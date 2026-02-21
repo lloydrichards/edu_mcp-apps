@@ -1,0 +1,43 @@
+name: bevr-app
+services:
+  server:
+    build:
+      context: .
+      dockerfile: ./apps/server/Dockerfile
+    environment:
+      PORT: 9000
+      HOST: 0.0.0.0
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost:3000}
+    expose:
+      - "9000"
+    networks:
+      - app-network
+
+  server-mcp:
+    build:
+      context: .
+      dockerfile: ./apps/server-mcp/Dockerfile
+    environment:
+      MCP_PORT: 8000
+    expose:
+      - "8000"
+    networks:
+      - app-network
+
+  client:
+    build:
+      context: .
+      dockerfile: ./apps/client/Dockerfile
+      args:
+        SERVER_URL: ${SERVER_URL:-http://localhost:9000}
+    expose:
+      - "80"
+    networks:
+      - app-network
+    depends_on:
+      - server
+      - server-mcp
+
+networks:
+  app-network:
+    driver: bridge
