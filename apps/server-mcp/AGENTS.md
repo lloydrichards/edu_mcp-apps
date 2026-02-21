@@ -1,4 +1,4 @@
-# MCP Server AGENTS.md
+# MCP Apps Server AGENTS.md
 
 > See root `/AGENTS.md` for monorepo conventions.
 
@@ -8,6 +8,19 @@
 | ------------------------------ | ---------------------------- |
 | `bun dev --filter=server-mcp`  | Start MCP server (port 9009) |
 | `bun test --filter=server-mcp` | Run MCP tests                |
+
+## MCP Apps Focus
+
+The `apps/server-mcp` workspace is the primary playground for MCP Apps.
+Prioritize experiments that render interactive Views in MCP hosts and validate
+them with the MCP Apps inspector.
+
+## MCP Apps Essentials
+
+- **MCP Apps = Tool + UI Resource** linked via `_meta.ui.resourceUri`
+- **UI resources** use the `ui://` scheme and serve bundled HTML/JS
+- **Hosts** render the UI in a sandboxed iframe and use JSON-RPC over
+  `postMessage` for app-to-host communication
 
 ## MCP Components
 
@@ -49,6 +62,43 @@ McpServer.toolkit(MyTools).pipe(
 );
 ```
 
+## MCP Apps Registration Pattern
+
+```typescript
+import {
+  registerAppResource,
+  registerAppTool,
+  RESOURCE_MIME_TYPE,
+} from "@modelcontextprotocol/ext-apps/server";
+
+const resourceUri = "ui://example/mcp-app.html";
+
+registerAppTool(server, "example", {
+  title: "Example",
+  description: "Returns example data.",
+  inputSchema: {},
+  _meta: { ui: { resourceUri } },
+}, async () => ({
+  content: [{ type: "text", text: "Hello from MCP Apps" }],
+}));
+
+registerAppResource(
+  server,
+  resourceUri,
+  resourceUri,
+  { mimeType: RESOURCE_MIME_TYPE },
+  async () => ({
+    contents: [
+      {
+        uri: resourceUri,
+        mimeType: RESOURCE_MIME_TYPE,
+        text: "<html>...</html>",
+      },
+    ],
+  })
+);
+```
+
 ## Layer Composition
 
 ```typescript
@@ -71,6 +121,11 @@ HttpLayerRouter.serve(McpRouter).pipe(Layer.launch);
 ```bash
 MCP_PORT=9009  # MCP server port (default)
 ```
+
+## References
+
+- MCP Apps Blog: https://blog.modelcontextprotocol.io/posts/2026-01-26-mcp-apps/
+- MCP Apps Quickstart: https://modelcontextprotocol.github.io/ext-apps/api/documents/Quickstart.html
 
 ---
 

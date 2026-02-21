@@ -1,22 +1,24 @@
 # AGENTS.md
 
+Exploration workspace for MCP Apps, the MCP extension that lets tools return
+interactive UI elements rendered inside chat clients. Most experiments live in
+`apps/server-mcp` and are validated with the MCP Apps inspector.
+
 > Note: This file is the authoritative source for coding agent instructions. If
 > in doubt, prefer AGENTS.md over README.md. See nested AGENTS.md files in each
 > workspace for app-specific patterns.
 
 ## Commands
 
-| Command                                        | Purpose                                   |
-| ---------------------------------------------- | ----------------------------------------- |
-| `bun install`                                  | Install dependencies                      |
-| `bun dev`                                      | Start all apps (client:3000, server:9000) |
-| `bun dev --filter=client`                      | Start client only                         |
-| `bun dev --filter=server`                      | Start server only                         |
-| `bun run build`                                | Build all apps                            |
-| `bun lint`                                     | Lint with Biome                           |
-| `bun format`                                   | Format with Biome                         |
-| `bun test`                                     | Run all tests (Vitest)                    |
-| `bun test --filter=server -- src/file.test.ts` | Run single test file                      |
+| Command                                        | Purpose                   |
+| ---------------------------------------------- | ------------------------- |
+| `bun install`                                  | Install dependencies      |
+| `bun dev`                                      | Start all apps (mcp:9009) |
+| `bun run build`                                | Build all apps            |
+| `bun lint`                                     | Lint with Biome           |
+| `bun format`                                   | Format with Biome         |
+| `bun test`                                     | Run all tests (Vitest)    |
+| `bun test --filter=server -- src/file.test.ts` | Run single test file      |
 
 ## Tech Stack
 
@@ -49,12 +51,15 @@ Effect.gen(function* () {
 
 ## Structure
 
-| Workspace         | Stack                | AGENTS.md                   |
-| ----------------- | -------------------- | --------------------------- |
-| `apps/client`     | React + Effect Atom  | `apps/client/AGENTS.md`     |
-| `apps/server`     | Effect Platform, RPC | `apps/server/AGENTS.md`     |
-| `apps/server-mcp` | Effect MCP Server    | `apps/server-mcp/AGENTS.md` |
-| `packages/domain` | Effect Schema, RPC   | `packages/domain/AGENTS.md` |
+| Workspace         | Stack              | AGENTS.md                   |
+| ----------------- | ------------------ | --------------------------- |
+| `apps/server-mcp` | Effect MCP Server  | `apps/server-mcp/AGENTS.md` |
+| `packages/domain` | Effect Schema, RPC | `packages/domain/AGENTS.md` |
+
+## MCP Apps References
+
+- Blog overview: https://blog.modelcontextprotocol.io/posts/2026-01-26-mcp-apps/
+- Quickstart: https://modelcontextprotocol.github.io/ext-apps/api/documents/Quickstart.html
 
 ---
 
