@@ -61,6 +61,22 @@ Effect.gen(function* () {
 - Blog overview: https://blog.modelcontextprotocol.io/posts/2026-01-26-mcp-apps/
 - Quickstart: https://modelcontextprotocol.github.io/ext-apps/api/documents/Quickstart.html
 
+## Local Source References
+
+When answering questions about Effect, MCP Apps, or the MCP spec, search these
+cloned source repos first:
+
+- `.reference/effect/`
+- `.reference/ext-apps/`
+- `.reference/spec/`
+
+If any of the folders are missing (they are git ignored), clone them into
+`reference/`:
+
+- `https://github.com/Effect-TS/effect-smol.git` -> `.reference/effect/`
+- `https://github.com/modelcontextprotocol/ext-apps.git` -> `.reference/ext-apps/`
+- `https://github.com/modelcontextprotocol/modelcontextprotocol.git` -> `.reference/spec/`
+
 ---
 
 _This document is a living guide. Update it as the project evolves and new
