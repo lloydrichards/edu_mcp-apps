@@ -1,4 +1,4 @@
-name: Check - Client
+name: Check - Server MCP
 
 on:
   workflow_dispatch:
@@ -6,13 +6,13 @@ on:
     branches:
       - main
     paths:
-      - "apps/client/**"
+      - "apps/server-mcp/**"
       - "packages/domain/**"
   pull_request:
     branches:
       - main
     paths:
-      - "apps/client/**"
+      - "apps/server-mcp/**"
       - "packages/domain/**"
 
 jobs:
