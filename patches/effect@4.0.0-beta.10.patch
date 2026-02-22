@@ -1,0 +1,73 @@
+diff --git a/dist/unstable/ai/McpSchema.d.ts b/dist/unstable/ai/McpSchema.d.ts
+index 0b41fb36d21a9bb8e0f24403f62d44667df318e5..d63869194fac3e5d73dc13c1686a6779f4f2fadc 100644
+--- a/dist/unstable/ai/McpSchema.d.ts
++++ b/dist/unstable/ai/McpSchema.d.ts
+@@ -829,10 +829,12 @@ declare const Resource_base: Schema.ExtendableClass<Resource, Schema.Struct<{
+      * The MIME type of this resource, if known.
+      */
+     readonly mimeType: Schema.decodeTo<Schema.optional<Schema.String>, Schema.optionalKey<Schema.String>, never, never>;
++    readonly _meta: Schema.decodeTo<Schema.optional<Schema.$Record<Schema.String, Schema.Any>>, Schema.optionalKey<Schema.$Record<Schema.String, Schema.Any>>, never, never>;
+     /**
+      * Optional annotations for the client.
+      */
+     readonly annotations: Schema.decodeTo<Schema.optional<typeof Annotations>, Schema.optionalKey<typeof Annotations>, never, never>;
++    readonly _meta: Schema.decodeTo<Schema.optional<Schema.$Record<Schema.String, Schema.Any>>, Schema.optionalKey<Schema.$Record<Schema.String, Schema.Any>>, never, never>;
+     /**
+      * The size of the raw resource content, in bytes (i.e., before base64
+      * encoding or any tokenization), if known.
+@@ -875,10 +877,12 @@ declare const ResourceTemplate_base: Schema.ExtendableClass<ResourceTemplate, Sc
+      * be included if all resources matching this template have the same type.
+      */
+     readonly mimeType: Schema.decodeTo<Schema.optional<Schema.String>, Schema.optionalKey<Schema.String>, never, never>;
++    readonly _meta: Schema.decodeTo<Schema.optional<Schema.$Record<Schema.String, Schema.Any>>, Schema.optionalKey<Schema.$Record<Schema.String, Schema.Any>>, never, never>;
+     /**
+      * Optional annotations for the client.
+      */
+     readonly annotations: Schema.decodeTo<Schema.optional<typeof Annotations>, Schema.optionalKey<typeof Annotations>, never, never>;
++    readonly _meta: Schema.decodeTo<Schema.optional<Schema.$Record<Schema.String, Schema.Any>>, Schema.optionalKey<Schema.$Record<Schema.String, Schema.Any>>, never, never>;
+ }>, {}>;
+ /**
+  * A template description for resources available on the server.
+@@ -1710,6 +1714,7 @@ declare const Tool_base: Schema.ExtendableClass<Tool, Schema.Struct<{
+      * Optional additional tool information.
+      */
+     readonly annotations: Schema.decodeTo<Schema.optional<typeof ToolAnnotations>, Schema.optionalKey<typeof ToolAnnotations>, never, never>;
++    readonly _meta: Schema.decodeTo<Schema.optional<Schema.$Record<Schema.String, Schema.Any>>, Schema.optionalKey<Schema.$Record<Schema.String, Schema.Any>>, never, never>;
+ }>, {}>;
+ /**
+  * Definition for a tool the client can call.
+diff --git a/dist/unstable/ai/McpSchema.js b/dist/unstable/ai/McpSchema.js
+index afde78137150fe6935ccc956abebc2453bd5edf4..67f10d8ea9ee39442b75e6329ada56e621f32862 100644
+--- a/dist/unstable/ai/McpSchema.js
++++ b/dist/unstable/ai/McpSchema.js
+@@ -506,10 +506,12 @@ export class Resource extends /*#__PURE__*/Schema.Class("@effect/ai/McpSchema/Re
+    * The MIME type of this resource, if known.
+    */
+   mimeType: /*#__PURE__*/optional(Schema.String),
++  _meta: /*#__PURE__*/optional(/*#__PURE__*/Schema.Record(Schema.String, Schema.Any)),
+   /**
+    * Optional annotations for the client.
+    */
+   annotations: /*#__PURE__*/optional(Annotations),
++  _meta: /*#__PURE__*/optional(/*#__PURE__*/Schema.Record(Schema.String, Schema.Any)),
+   /**
+    * The size of the raw resource content, in bytes (i.e., before base64
+    * encoding or any tokenization), if known.
+@@ -550,6 +552,7 @@ export class ResourceTemplate extends /*#__PURE__*/Schema.Class("@effect/ai/McpS
+    * be included if all resources matching this template have the same type.
+    */
+   mimeType: /*#__PURE__*/optional(Schema.String),
++  _meta: /*#__PURE__*/optional(/*#__PURE__*/Schema.Record(Schema.String, Schema.Any)),
+   /**
+    * Optional annotations for the client.
+    */
+@@ -1031,7 +1034,8 @@ export class Tool extends /*#__PURE__*/Schema.Class("@effect/ai/McpSchema/Tool")
+   /**
+    * Optional additional tool information.
+    */
+-  annotations: /*#__PURE__*/optional(ToolAnnotations)
++  annotations: /*#__PURE__*/optional(ToolAnnotations),
++  _meta: /*#__PURE__*/optional(/*#__PURE__*/Schema.Record(Schema.String, Schema.Any))
+ }) {}
+ /**
+  * The server's response to a tools/list request from the client.
