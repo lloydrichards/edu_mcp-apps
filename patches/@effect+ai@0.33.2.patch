@@ -1,0 +1,172 @@
+diff --git a/apps/server-mcp/node_modules/@effect/ai/dist/esm/McpSchema.js b/apps/server-mcp/node_modules/@effect/ai/dist/esm/McpSchema.js
+index 8ff5a2d..b2a4c9c 100644
+--- a/apps/server-mcp/node_modules/@effect/ai/dist/esm/McpSchema.js
++++ b/apps/server-mcp/node_modules/@effect/ai/dist/esm/McpSchema.js
+@@ -151,6 +151,10 @@ export class ClientCapabilities extends /*#__PURE__*/Schema.Class("@effect/ai/Mc
+   /**
+    * Experimental, non-standard capabilities that the client supports.
+    */
++  extensions: /*#__PURE__*/Schema.optional(/*#__PURE__*/Schema.Record({
++    key: Schema.String,
++    value: Schema.Unknown
++  })),
+   experimental: /*#__PURE__*/Schema.optional(/*#__PURE__*/Schema.Record({
+     key: Schema.String,
+     value: /*#__PURE__*/Schema.Struct({})
+@@ -185,6 +189,10 @@ export class ServerCapabilities extends /*#__PURE__*/Schema.Struct({
+   /**
+    * Experimental, non-standard capabilities that the server supports.
+    */
++  extensions: /*#__PURE__*/Schema.optional(/*#__PURE__*/Schema.Record({
++    key: Schema.String,
++    value: Schema.Unknown
++  })),
+   experimental: /*#__PURE__*/Schema.optional(/*#__PURE__*/Schema.Record({
+     key: Schema.String,
+     value: /*#__PURE__*/Schema.Struct({})
+@@ -475,6 +483,10 @@ export class Resource extends /*#__PURE__*/Schema.Class("@effect/ai/McpSchema/Res
+   /**
+    * The URI of this resource.
+    */
++  _meta: /*#__PURE__*/Schema.optional(/*#__PURE__*/Schema.Record({
++    key: Schema.String,
++    value: Schema.Unknown
++  })),
+   uri: Schema.String,
+   /**
+    * A human-readable name for this resource.
+@@ -553,6 +565,10 @@ export class ResourceContents extends /*#__PURE__*/Schema.Struct({
+   /**
+    * The URI of this resource.
+    */
++  _meta: /*#__PURE__*/Schema.optional(/*#__PURE__*/Schema.Record({
++    key: Schema.String,
++    value: Schema.Unknown
++  })),
+   uri: Schema.String,
+   /**
+    * The MIME type of this resource, if known.
+@@ -1015,6 +1031,10 @@ export class Tool extends /*#__PURE__*/Schema.Class("@effect/ai/McpSchema/Tool"){
+   /**
+    * The name of the tool.
+    */
++  _meta: /*#__PURE__*/Schema.optional(/*#__PURE__*/Schema.Record({
++    key: Schema.String,
++    value: Schema.Unknown
++  })),
+   name: Schema.String,
+   title: /*#__PURE__*/Schema.optional(Schema.String),
+   /**
+diff --git a/apps/server-mcp/node_modules/@effect/ai/dist/cjs/McpSchema.js b/apps/server-mcp/node_modules/@effect/ai/dist/cjs/McpSchema.js
+index e3dc9b3..ab0f6af 100644
+--- a/apps/server-mcp/node_modules/@effect/ai/dist/cjs/McpSchema.js
++++ b/apps/server-mcp/node_modules/@effect/ai/dist/cjs/McpSchema.js
+@@ -165,6 +165,10 @@ class ClientCapabilities extends /*#__PURE__*/Schema.Class("@effect/ai/McpSchema/
+   /**
+    * Experimental, non-standard capabilities that the client supports.
+    */
++  extensions: /*#__PURE__*/Schema.optional(/*#__PURE__*/Schema.Record({
++    key: Schema.String,
++    value: Schema.Unknown
++  })),
+   experimental: /*#__PURE__*/Schema.optional(/*#__PURE__*/Schema.Record({
+     key: Schema.String,
+     value: /*#__PURE__*/Schema.Struct({})
+@@ -201,6 +205,10 @@ class ServerCapabilities extends /*#__PURE__*/Schema.Struct({
+   /**
+    * Experimental, non-standard capabilities that the server supports.
+    */
++  extensions: /*#__PURE__*/Schema.optional(/*#__PURE__*/Schema.Record({
++    key: Schema.String,
++    value: Schema.Unknown
++  })),
+   experimental: /*#__PURE__*/Schema.optional(/*#__PURE__*/Schema.Record({
+     key: Schema.String,
+     value: /*#__PURE__*/Schema.Struct({})
+@@ -503,6 +511,10 @@ class Resource extends /*#__PURE__*/Schema.Class("@effect/ai/McpSchema/Resource"{
+   /**
+    * The URI of this resource.
+    */
++  _meta: /*#__PURE__*/Schema.optional(/*#__PURE__*/Schema.Record({
++    key: Schema.String,
++    value: Schema.Unknown
++  })),
+   uri: Schema.String,
+   /**
+    * A human-readable name for this resource.
+@@ -584,6 +596,10 @@ class ResourceContents extends /*#__PURE__*/Schema.Struct({
+   /**
+    * The URI of this resource.
+    */
++  _meta: /*#__PURE__*/Schema.optional(/*#__PURE__*/Schema.Record({
++    key: Schema.String,
++    value: Schema.Unknown
++  })),
+   uri: Schema.String,
+   /**
+    * The MIME type of this resource, if known.
+@@ -1074,6 +1090,10 @@ class Tool extends /*#__PURE__*/Schema.Class("@effect/ai/McpSchema/Tool")({
+   /**
+    * The name of the tool.
+    */
++  _meta: /*#__PURE__*/Schema.optional(/*#__PURE__*/Schema.Record({
++    key: Schema.String,
++    value: Schema.Unknown
++  })),
+   name: Schema.String,
+   title: /*#__PURE__*/Schema.optional(Schema.String),
+   /**
+diff --git a/apps/server-mcp/node_modules/@effect/ai/dist/esm/McpServer.js b/apps/server-mcp/node_modules/@effect/ai/dist/esm/McpServer.js
+index 4f8e7e1..2a45a1d 100644
+--- a/apps/server-mcp/node_modules/@effect/ai/dist/esm/McpServer.js
++++ b/apps/server-mcp/node_modules/@effect/ai/dist/esm/McpServer.js
+@@ -36,6 +36,7 @@ export class McpServer extends /*#__PURE__*/Context.Tag("@effect/ai/McpServer")(){
+     const resources = [];
+     const resourceTemplates = [];
+     const prompts = [];
++    const clientCapabilities = new Map();
+@@ -69,6 +70,8 @@ export class McpServer extends /*#__PURE__*/Context.Tag("@effect/ai/McpServer")(){
+       notifications: notifications.client,
+       notificationsMailbox,
+       initializedClients: new Set(),
++      clientCapabilities,
++      getClientCapabilities: clientId => clientCapabilities.get(clientId),
+@@ -729,6 +732,9 @@ const layerHandlers = serverInfo => ClientRpcs.toLayer(Effect.gen(function* () {
+       if (server.prompts.length > 0) {
+         capabilities.prompts = {
+           listChanged: true
+         };
+       }
++      capabilities.extensions = {
++        "io.modelcontextprotocol/ui": {}
++      };
++      server.clientCapabilities.set(clientId, params.capabilities);
+       server.initializedClients.add(clientId);
+       return Effect.succeed({
+diff --git a/apps/server-mcp/node_modules/@effect/ai/dist/cjs/McpServer.js b/apps/server-mcp/node_modules/@effect/ai/dist/cjs/McpServer.js
+index 8e60cf3..38f3a78 100644
+--- a/apps/server-mcp/node_modules/@effect/ai/dist/cjs/McpServer.js
++++ b/apps/server-mcp/node_modules/@effect/ai/dist/cjs/McpServer.js
+@@ -44,6 +44,7 @@ class McpServer extends /*#__PURE__*/Context.Tag("@effect/ai/McpServer")(){
+     const resources = [];
+     const resourceTemplates = [];
+     const prompts = [];
++    const clientCapabilities = new Map();
+@@ -77,6 +78,8 @@ class McpServer extends /*#__PURE__*/Context.Tag("@effect/ai/McpServer")(){
+       notifications: notifications.client,
+       notificationsMailbox,
+       initializedClients: new Set(),
++      clientCapabilities,
++      getClientCapabilities: clientId => clientCapabilities.get(clientId),
+@@ -746,6 +751,9 @@ const layerHandlers = serverInfo => ClientRpcs.toLayer(Effect.gen(function* () {
+       if (server.prompts.length > 0) {
+         capabilities.prompts = {
+           listChanged: true
+         };
+       }
++      capabilities.extensions = {
++        "io.modelcontextprotocol/ui": {}
++      };
++      server.clientCapabilities.set(clientId, params.capabilities);
+       server.initializedClients.add(clientId);
+       return Effect.succeed({
