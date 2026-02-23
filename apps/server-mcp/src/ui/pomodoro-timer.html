@@ -1,0 +1,336 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Pomodoro Timer</title>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.20.1/cdn/themes/light.css"
+    />
+    <style>
+      :root {
+        color-scheme: light dark;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        font-family: var(
+          --font-sans,
+          "Inter",
+          "Segoe UI",
+          system-ui,
+          sans-serif
+        );
+        background: var(--color-background-primary, #f6f3ee);
+        color: var(--color-text-primary, #1f1b16);
+      }
+      .wrap {
+        padding: 18px;
+      }
+      .card {
+        background:
+          radial-gradient(
+            circle at 20% 20%,
+            rgba(255, 182, 146, 0.22),
+            transparent 45%
+          ),
+          var(--color-background-secondary, #fffaf5);
+        border-radius: var(--border-radius-lg, 16px);
+        padding: 18px;
+        border: 1px solid var(--color-border-secondary, rgba(0, 0, 0, 0.12));
+        box-shadow: var(--shadow-sm, 0 8px 24px rgba(0, 0, 0, 0.08));
+      }
+      header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+      }
+      h1 {
+        margin: 0;
+        font-size: 16px;
+        font-weight: 700;
+        letter-spacing: 0.01em;
+      }
+      .sub {
+        margin: 6px 0 0;
+        font-size: 12px;
+        color: var(--color-text-secondary, #5b4d41);
+      }
+      .display {
+        margin-top: 16px;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 14px;
+        align-items: center;
+      }
+      .time {
+        font-size: 32px;
+        font-weight: 700;
+        font-family: var(
+          --font-mono,
+          "SFMono-Regular",
+          "Courier New",
+          monospace
+        );
+      }
+      .label {
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+        font-size: 10px;
+        color: var(--color-text-tertiary, #7a6b5d);
+      }
+      .progress {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .actions {
+        margin-top: 16px;
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+      .actions sl-button::part(base) {
+        font-weight: 600;
+      }
+      .settings {
+        margin-top: 14px;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        gap: 10px;
+      }
+      .status {
+        margin-top: 10px;
+        font-size: 12px;
+        color: var(--color-text-secondary, #5b4d41);
+        min-height: 16px;
+      }
+      @media (max-width: 520px) {
+        .display {
+          grid-template-columns: 1fr;
+        }
+        .progress {
+          justify-content: flex-start;
+        }
+      }
+    </style>
+    <script
+      type="module"
+      src="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.20.1/cdn/shoelace-autoloader.js"
+    ></script>
+  </head>
+  <body>
+    <div class="wrap">
+      <div class="card">
+        <header>
+          <div>
+            <h1>Pomodoro Timer</h1>
+            <p class="sub">Focus sessions with short breaks.</p>
+          </div>
+          <sl-tag size="small" variant="neutral" id="modeTag">Focus</sl-tag>
+        </header>
+
+        <div class="display">
+          <div>
+            <div class="label" id="cycleLabel">Session 1</div>
+            <div class="time" id="timeDisplay">25:00</div>
+          </div>
+          <div class="progress">
+            <sl-progress-ring value="0" id="progressRing"></sl-progress-ring>
+          </div>
+        </div>
+
+        <div class="actions">
+          <sl-button variant="primary" id="startBtn">Start</sl-button>
+          <sl-button variant="default" id="pauseBtn" disabled>Pause</sl-button>
+          <sl-button variant="default" id="resetBtn">Reset</sl-button>
+          <sl-button variant="text" id="skipBtn">Skip</sl-button>
+        </div>
+
+        <div class="settings">
+          <sl-input
+            type="number"
+            min="1"
+            max="60"
+            label="Focus (min)"
+            value="25"
+            id="focusInput"
+          ></sl-input>
+          <sl-input
+            type="number"
+            min="1"
+            max="30"
+            label="Break (min)"
+            value="5"
+            id="breakInput"
+          ></sl-input>
+        </div>
+
+        <div class="status" id="status">Ready.</div>
+      </div>
+    </div>
+
+    <script type="module">
+      const startBtn = document.getElementById("startBtn");
+      const pauseBtn = document.getElementById("pauseBtn");
+      const resetBtn = document.getElementById("resetBtn");
+      const skipBtn = document.getElementById("skipBtn");
+      const focusInput = document.getElementById("focusInput");
+      const breakInput = document.getElementById("breakInput");
+      const timeDisplay = document.getElementById("timeDisplay");
+      const progressRing = document.getElementById("progressRing");
+      const modeTag = document.getElementById("modeTag");
+      const cycleLabel = document.getElementById("cycleLabel");
+      const status = document.getElementById("status");
+
+      const MODE_FOCUS = "focus";
+      const MODE_BREAK = "break";
+
+      let mode = MODE_FOCUS;
+      let sessionIndex = 1;
+      let isRunning = false;
+      let timerId = null;
+      let totalSeconds = 25 * 60;
+      let remainingSeconds = totalSeconds;
+
+      const formatTime = (seconds) => {
+        const mins = Math.floor(seconds / 60);
+        const secs = seconds % 60;
+        return `${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
+      };
+
+      const getModeSeconds = () => {
+        const raw = mode === MODE_FOCUS ? focusInput.value : breakInput.value;
+        const minutes = Math.max(1, Number(raw || 0));
+        return minutes * 60;
+      };
+
+      const updateRing = () => {
+        if (totalSeconds <= 0) {
+          progressRing.value = 0;
+          return;
+        }
+        const percent = (1 - remainingSeconds / totalSeconds) * 100;
+        progressRing.value = Math.min(100, Math.max(0, Math.round(percent)));
+      };
+
+      const updateDisplay = () => {
+        timeDisplay.textContent = formatTime(remainingSeconds);
+        updateRing();
+      };
+
+      const updateModeUI = () => {
+        modeTag.textContent = mode === MODE_FOCUS ? "Focus" : "Break";
+        cycleLabel.textContent = `Session ${sessionIndex}`;
+      };
+
+      const setButtons = (running) => {
+        startBtn.disabled = running;
+        pauseBtn.disabled = !running;
+      };
+
+      const setStatus = (message) => {
+        status.textContent = message;
+      };
+
+      const stopTimer = () => {
+        if (timerId) {
+          clearInterval(timerId);
+          timerId = null;
+        }
+        isRunning = false;
+        setButtons(false);
+      };
+
+      const startTimer = ({ restart }) => {
+        if (restart) {
+          totalSeconds = getModeSeconds();
+          remainingSeconds = totalSeconds;
+        }
+
+        if (isRunning) {
+          return;
+        }
+
+        isRunning = true;
+        setButtons(true);
+        setStatus(mode === MODE_FOCUS ? "Focus time." : "Break time.");
+        updateDisplay();
+
+        timerId = setInterval(() => {
+          remainingSeconds -= 1;
+          if (remainingSeconds <= 0) {
+            remainingSeconds = 0;
+            updateDisplay();
+            advanceMode(true);
+            return;
+          }
+          updateDisplay();
+        }, 1000);
+      };
+
+      const advanceMode = (autoStart) => {
+        stopTimer();
+        if (mode === MODE_FOCUS) {
+          mode = MODE_BREAK;
+        } else {
+          mode = MODE_FOCUS;
+          sessionIndex += 1;
+        }
+        updateModeUI();
+        totalSeconds = getModeSeconds();
+        remainingSeconds = totalSeconds;
+        updateDisplay();
+        setStatus(mode === MODE_FOCUS ? "Focus time." : "Break time.");
+        if (autoStart) {
+          startTimer({ restart: false });
+        }
+      };
+
+      startBtn.addEventListener("click", () => {
+        const shouldRestart =
+          remainingSeconds === 0 || remainingSeconds === totalSeconds;
+        startTimer({ restart: shouldRestart });
+      });
+
+      pauseBtn.addEventListener("click", () => {
+        stopTimer();
+        setStatus("Paused.");
+      });
+
+      resetBtn.addEventListener("click", () => {
+        stopTimer();
+        totalSeconds = getModeSeconds();
+        remainingSeconds = totalSeconds;
+        updateDisplay();
+        setStatus("Ready.");
+      });
+
+      skipBtn.addEventListener("click", () => {
+        advanceMode(false);
+      });
+
+      const handleInputChange = () => {
+        if (isRunning) {
+          setStatus("Changes apply next session.");
+          return;
+        }
+        totalSeconds = getModeSeconds();
+        remainingSeconds = totalSeconds;
+        updateDisplay();
+        setStatus("Ready.");
+      };
+
+      focusInput.addEventListener("sl-change", handleInputChange);
+      breakInput.addEventListener("sl-change", handleInputChange);
+
+      updateModeUI();
+      updateDisplay();
+      setButtons(false);
+    </script>
+  </body>
+</html>

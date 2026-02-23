@@ -6,9 +6,22 @@ import { HttpRouter, HttpServer } from "effect/unstable/http";
 const UiResourceMimeType = "text/html;profile=mcp-app";
 const GetTimeUiResourceUri = "ui://examples/get-time";
 const PollingUiResourceUri = "ui://examples/polling-dashboard";
+const PomodoroUiResourceUri = "ui://examples/pomodoro-timer";
 const UiBaseUrl = new URL("./ui/", import.meta.url);
 
-const uiContent = (uri: string, fileName: string) =>
+const uiContent = (
+  uri: string,
+  fileName: string,
+  uiMeta: {
+    prefersBorder?: boolean;
+    csp?: {
+      resourceDomains?: string[];
+      connectDomains?: string[];
+      frameDomains?: string[];
+      baseUriDomains?: string[];
+    };
+  } = { prefersBorder: true },
+) =>
   Effect.gen(function* () {
     const html = yield* Effect.tryPromise({
       try: () => Bun.file(new URL(fileName, UiBaseUrl)).text(),
@@ -23,7 +36,7 @@ const uiContent = (uri: string, fileName: string) =>
           text: html,
           _meta: {
             ui: {
-              prefersBorder: true,
+              ...uiMeta,
             },
           },
         },
@@ -54,6 +67,18 @@ const ResourceLayer = Layer.mergeAll(
     description: "Polling dashboard example UI",
     mimeType: UiResourceMimeType,
     content: uiContent(PollingUiResourceUri, "polling-dashboard.html"),
+  }),
+  McpServer.resource({
+    uri: PomodoroUiResourceUri,
+    name: "Pomodoro Timer",
+    description: "Pomodoro timer UI built with web components",
+    mimeType: UiResourceMimeType,
+    content: uiContent(PomodoroUiResourceUri, "pomodoro-timer.html", {
+      prefersBorder: true,
+      csp: {
+        resourceDomains: ["https://cdn.jsdelivr.net"],
+      },
+    }),
   }),
 );
 
@@ -132,6 +157,19 @@ const PollingDashboardTool = Tool.make("PollingDashboard", {
     },
   });
 
+const PomodoroTimerTool = Tool.make("PomodoroTimer", {
+  description: "Render the Pomodoro timer UI",
+  parameters: Schema.Struct({}),
+  success: Schema.String,
+  failure: Schema.Never,
+})
+  .annotate(Tool.Title, "Pomodoro Timer")
+  .annotate(Tool.Meta, {
+    ui: {
+      resourceUri: PomodoroUiResourceUri,
+    },
+  });
+
 const PollDashboardStatsTool = Tool.make("PollDashboardStats", {
   description: "Returns latest dashboard stats for the polling UI",
   parameters: Schema.Struct({}),
@@ -147,6 +185,7 @@ const UiToolkit = Toolkit.make(
   GetTimeTool,
   PollingDashboardTool,
   PollDashboardStatsTool,
+  PomodoroTimerTool,
 );
 
 const UiToolLayer = McpServer.toolkit(UiToolkit).pipe(
@@ -170,6 +209,8 @@ const UiToolLayer = McpServer.toolkit(UiToolkit).pipe(
           const status = cpu > 75 ? "busy" : cpu < 35 ? "idle" : "ok";
           return { timestamp, cpu, memory, requests, status };
         }),
+      PomodoroTimer: () =>
+        Effect.succeed("Pomodoro timer ready. Use the UI to start."),
     }),
   ),
 );
