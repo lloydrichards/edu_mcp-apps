@@ -1,0 +1,250 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Polling Dashboard</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        font-family: var(--font-sans, system-ui, sans-serif);
+        background: var(--color-background-primary, #fff);
+        color: var(--color-text-primary, #111);
+      }
+      .wrap {
+        padding: 16px;
+      }
+      .card {
+        background: var(--color-background-secondary, #f7f7f5);
+        border-radius: var(--border-radius-lg, 10px);
+        padding: 16px;
+        border: 1px solid var(--color-border-secondary, rgba(0, 0, 0, 0.1));
+      }
+      header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+      }
+      h1 {
+        margin: 0;
+        font-size: 16px;
+        font-weight: 600;
+      }
+      .status {
+        padding: 4px 8px;
+        border-radius: 999px;
+        font-size: 11px;
+        text-transform: uppercase;
+        background: var(--color-background-tertiary, #eee);
+        color: var(--color-text-secondary, #555);
+        border: 1px solid var(--color-border-tertiary, rgba(0, 0, 0, 0.08));
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+        gap: 10px;
+        margin-top: 12px;
+      }
+      .tile {
+        border-radius: var(--border-radius-md, 8px);
+        border: 1px solid var(--color-border-tertiary, rgba(0, 0, 0, 0.08));
+        padding: 12px;
+        background: var(--color-background-primary, #fff);
+      }
+      .label {
+        font-size: 12px;
+        color: var(--color-text-secondary, #555);
+      }
+      .value {
+        font-size: 16px;
+        font-weight: 600;
+        margin-top: 6px;
+        font-family: var(--font-mono, ui-monospace, monospace);
+      }
+      .bar {
+        position: relative;
+        height: 6px;
+        border-radius: 999px;
+        background: var(--color-background-tertiary, #eee);
+        margin-top: 8px;
+        overflow: hidden;
+      }
+      .bar > span {
+        position: absolute;
+        inset: 0;
+        width: 0;
+        background: var(--color-text-primary, #111);
+        transition: width 0.4s ease;
+      }
+      .footer {
+        margin-top: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        font-size: 12px;
+        color: var(--color-text-secondary, #555);
+      }
+      .toggle {
+        border: 1px solid var(--color-border-secondary, rgba(0, 0, 0, 0.1));
+        background: transparent;
+        border-radius: 999px;
+        padding: 6px 10px;
+        color: var(--color-text-primary, #111);
+        font-size: 12px;
+        cursor: pointer;
+      }
+      .toggle[aria-pressed="true"] {
+        background: var(--color-background-inverse, #111);
+        color: var(--color-text-inverse, #fff);
+        border-color: transparent;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <div class="card">
+        <header>
+          <h1>Polling Dashboard</h1>
+          <span class="status" id="status">idle</span>
+        </header>
+        <div class="grid">
+          <div class="tile">
+            <div class="label">CPU Load</div>
+            <div class="value" id="cpu">--</div>
+            <div class="bar"><span id="cpu-bar"></span></div>
+          </div>
+          <div class="tile">
+            <div class="label">Memory</div>
+            <div class="value" id="memory">--</div>
+            <div class="bar"><span id="memory-bar"></span></div>
+          </div>
+          <div class="tile">
+            <div class="label">Requests/min</div>
+            <div class="value" id="requests">--</div>
+          </div>
+          <div class="tile">
+            <div class="label">Last update</div>
+            <div class="value" id="timestamp">--</div>
+          </div>
+        </div>
+        <div class="footer">
+          <span id="hint">Waiting for polling to start…</span>
+          <button class="toggle" id="toggle" type="button" aria-pressed="true">
+            Polling on
+          </button>
+        </div>
+      </div>
+    </div>
+    <script>
+      let nextId = 1;
+      let intervalId = null;
+      const cpuEl = document.getElementById("cpu");
+      const memoryEl = document.getElementById("memory");
+      const requestsEl = document.getElementById("requests");
+      const timestampEl = document.getElementById("timestamp");
+      const statusEl = document.getElementById("status");
+      const hintEl = document.getElementById("hint");
+      const toggleBtn = document.getElementById("toggle");
+      const cpuBar = document.getElementById("cpu-bar");
+      const memoryBar = document.getElementById("memory-bar");
+
+      function sendRequest(method, params) {
+        const id = nextId++;
+        window.parent.postMessage({ jsonrpc: "2.0", id, method, params }, "*");
+        return new Promise((resolve, reject) => {
+          function listener(event) {
+            if (!event.data || event.data.id !== id) return;
+            window.removeEventListener("message", listener);
+            if (event.data.result) return resolve(event.data.result);
+            reject(event.data.error || new Error("Request failed"));
+          }
+          window.addEventListener("message", listener);
+        });
+      }
+
+      function sendNotification(method, params) {
+        window.parent.postMessage({ jsonrpc: "2.0", method, params }, "*");
+      }
+
+      function setStatus(value) {
+        statusEl.textContent = value;
+      }
+
+      function updateUI(data) {
+        cpuEl.textContent = `${data.cpu}%`;
+        memoryEl.textContent = `${data.memory}%`;
+        requestsEl.textContent = `${data.requests}`;
+        timestampEl.textContent = data.timestamp.slice(11, 19);
+        setStatus(data.status);
+        cpuBar.style.width = `${data.cpu}%`;
+        memoryBar.style.width = `${data.memory}%`;
+        hintEl.textContent = "Live stats updating";
+      }
+
+      async function poll() {
+        try {
+          const result = await sendRequest("tools/call", {
+            name: "PollDashboardStats",
+            arguments: {},
+          });
+          const structured = result?.structuredContent;
+          if (structured?.timestamp) {
+            updateUI(structured);
+            return;
+          }
+          const text = result?.content?.[0]?.text;
+          if (text) {
+            const parsed = JSON.parse(text);
+            if (parsed?.timestamp) {
+              updateUI(parsed);
+            }
+          }
+        } catch (_err) {
+          hintEl.textContent = "Polling failed";
+        }
+      }
+
+      function startPolling() {
+        if (intervalId !== null) return;
+        poll();
+        intervalId = window.setInterval(poll, 2000);
+        toggleBtn.setAttribute("aria-pressed", "true");
+        toggleBtn.textContent = "Polling on";
+      }
+
+      function stopPolling() {
+        if (intervalId === null) return;
+        clearInterval(intervalId);
+        intervalId = null;
+        toggleBtn.setAttribute("aria-pressed", "false");
+        toggleBtn.textContent = "Polling off";
+        hintEl.textContent = "Polling paused";
+      }
+
+      toggleBtn.addEventListener("click", () => {
+        if (intervalId === null) {
+          startPolling();
+        } else {
+          stopPolling();
+        }
+      });
+
+      sendRequest("ui/initialize", {
+        appCapabilities: {},
+        appInfo: { name: "polling-dashboard", version: "0.1.0" },
+        protocolVersion: "2025-06-18",
+      }).then(() => {
+        sendNotification("ui/notifications/initialized", {});
+        startPolling();
+      });
+    </script>
+  </body>
+</html>
