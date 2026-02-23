@@ -7,6 +7,7 @@ const UiResourceMimeType = "text/html;profile=mcp-app";
 const GetTimeUiResourceUri = "ui://examples/get-time";
 const PollingUiResourceUri = "ui://examples/polling-dashboard";
 const PomodoroUiResourceUri = "ui://examples/pomodoro-timer";
+const LineChartUiResourceUri = "ui://examples/line-chart";
 const UiBaseUrl = new URL("./ui/", import.meta.url);
 
 const uiContent = (
@@ -80,6 +81,19 @@ const ResourceLayer = Layer.mergeAll(
       },
     }),
   }),
+  McpServer.resource({
+    uri: LineChartUiResourceUri,
+    name: "Line Chart",
+    description: "Line chart UI powered by sszvis",
+    mimeType: UiResourceMimeType,
+    content: uiContent(LineChartUiResourceUri, "line-chart.html", {
+      prefersBorder: true,
+      csp: {
+        resourceDomains: ["https://cdn.jsdelivr.net"],
+        connectDomains: ["https://cdn.jsdelivr.net"],
+      },
+    }),
+  }),
 );
 
 // Define Prompts
@@ -131,6 +145,28 @@ const DashboardStats = Schema.Struct({
   status: Schema.Literals(["idle", "ok", "busy"]),
 });
 
+const LineChartNumber = Schema.Union([Schema.Number, Schema.NumberFromString]);
+
+const LineChartPoint = Schema.Struct({
+  x: LineChartNumber,
+  y: LineChartNumber,
+});
+
+const LineChartProps = Schema.Struct({
+  title: Schema.optional(Schema.String),
+  xLabel: Schema.optional(Schema.String),
+  yLabel: Schema.optional(Schema.String),
+  stroke: Schema.optional(Schema.String),
+  width: Schema.optional(LineChartNumber),
+  height: Schema.optional(LineChartNumber),
+  showPoints: Schema.optional(Schema.Boolean),
+});
+
+const LineChartPayload = Schema.Struct({
+  data: Schema.Array(LineChartPoint),
+  props: Schema.optional(LineChartProps),
+});
+
 const GetTimeTool = Tool.make("GetTime", {
   description: "Returns the current server time",
   parameters: Schema.Struct({}),
@@ -170,6 +206,19 @@ const PomodoroTimerTool = Tool.make("PomodoroTimer", {
     },
   });
 
+const RenderLineChartTool = Tool.make("RenderLineChart", {
+  description: "Render a line chart from data points",
+  parameters: LineChartPayload,
+  success: LineChartPayload,
+  failure: Schema.Never,
+})
+  .annotate(Tool.Title, "Line Chart")
+  .annotate(Tool.Meta, {
+    ui: {
+      resourceUri: LineChartUiResourceUri,
+    },
+  });
+
 const PollDashboardStatsTool = Tool.make("PollDashboardStats", {
   description: "Returns latest dashboard stats for the polling UI",
   parameters: Schema.Struct({}),
@@ -186,6 +235,7 @@ const UiToolkit = Toolkit.make(
   PollingDashboardTool,
   PollDashboardStatsTool,
   PomodoroTimerTool,
+  RenderLineChartTool,
 );
 
 const UiToolLayer = McpServer.toolkit(UiToolkit).pipe(
@@ -211,6 +261,7 @@ const UiToolLayer = McpServer.toolkit(UiToolkit).pipe(
         }),
       PomodoroTimer: () =>
         Effect.succeed("Pomodoro timer ready. Use the UI to start."),
+      RenderLineChart: (payload) => Effect.succeed(payload),
     }),
   ),
 );
