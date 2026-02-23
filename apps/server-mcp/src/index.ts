@@ -8,6 +8,7 @@ const GetTimeUiResourceUri = "ui://examples/get-time";
 const PollingUiResourceUri = "ui://examples/polling-dashboard";
 const PomodoroUiResourceUri = "ui://examples/pomodoro-timer";
 const LineChartUiResourceUri = "ui://examples/line-chart";
+const BarChartUiResourceUri = "ui://examples/bar-chart";
 const UiBaseUrl = new URL("./ui/", import.meta.url);
 
 const uiContent = (
@@ -94,6 +95,19 @@ const ResourceLayer = Layer.mergeAll(
       },
     }),
   }),
+  McpServer.resource({
+    uri: BarChartUiResourceUri,
+    name: "Bar Chart",
+    description: "Bar chart UI powered by sszvis",
+    mimeType: UiResourceMimeType,
+    content: uiContent(BarChartUiResourceUri, "bar-chart.html", {
+      prefersBorder: true,
+      csp: {
+        resourceDomains: ["https://cdn.jsdelivr.net"],
+        connectDomains: ["https://cdn.jsdelivr.net"],
+      },
+    }),
+  }),
 );
 
 // Define Prompts
@@ -150,12 +164,14 @@ const LineChartNumber = Schema.Union([Schema.Number, Schema.NumberFromString]);
 const LineChartPoint = Schema.Struct({
   x: LineChartNumber,
   y: LineChartNumber,
+  category: Schema.optional(Schema.String),
 });
 
 const LineChartProps = Schema.Struct({
   title: Schema.optional(Schema.String),
   xLabel: Schema.optional(Schema.String),
   yLabel: Schema.optional(Schema.String),
+  ticks: Schema.optional(LineChartNumber),
   stroke: Schema.optional(Schema.String),
   width: Schema.optional(LineChartNumber),
   height: Schema.optional(LineChartNumber),
@@ -165,6 +181,24 @@ const LineChartProps = Schema.Struct({
 const LineChartPayload = Schema.Struct({
   data: Schema.Array(LineChartPoint),
   props: Schema.optional(LineChartProps),
+});
+
+const BarChartNumber = Schema.Union([Schema.Number, Schema.NumberFromString]);
+
+const BarChartDatum = Schema.Struct({
+  category: Schema.String,
+  value: BarChartNumber,
+});
+
+const BarChartProps = Schema.Struct({
+  title: Schema.optional(Schema.String),
+  valueLabel: Schema.optional(Schema.String),
+  maxWidth: Schema.optional(BarChartNumber),
+});
+
+const BarChartPayload = Schema.Struct({
+  data: Schema.Array(BarChartDatum),
+  props: Schema.optional(BarChartProps),
 });
 
 const GetTimeTool = Tool.make("GetTime", {
@@ -219,6 +253,19 @@ const RenderLineChartTool = Tool.make("RenderLineChart", {
     },
   });
 
+const RenderBarChartTool = Tool.make("RenderBarChart", {
+  description: "Render a categorical bar chart",
+  parameters: BarChartPayload,
+  success: BarChartPayload,
+  failure: Schema.Never,
+})
+  .annotate(Tool.Title, "Bar Chart")
+  .annotate(Tool.Meta, {
+    ui: {
+      resourceUri: BarChartUiResourceUri,
+    },
+  });
+
 const PollDashboardStatsTool = Tool.make("PollDashboardStats", {
   description: "Returns latest dashboard stats for the polling UI",
   parameters: Schema.Struct({}),
@@ -236,6 +283,7 @@ const UiToolkit = Toolkit.make(
   PollDashboardStatsTool,
   PomodoroTimerTool,
   RenderLineChartTool,
+  RenderBarChartTool,
 );
 
 const UiToolLayer = McpServer.toolkit(UiToolkit).pipe(
@@ -262,6 +310,7 @@ const UiToolLayer = McpServer.toolkit(UiToolkit).pipe(
       PomodoroTimer: () =>
         Effect.succeed("Pomodoro timer ready. Use the UI to start."),
       RenderLineChart: (payload) => Effect.succeed(payload),
+      RenderBarChart: (payload) => Effect.succeed(payload),
     }),
   ),
 );
