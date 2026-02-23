@@ -1,5 +1,6 @@
 {
-  "name": "base_bevr-stack",
+  "name": "edu-mcp-apps",
+  "description": "MCP Apps specification exploration using Effect v4-beta for generative UI in chat applications",
   "private": true,
   "scripts": {
     "build": "turbo run build",

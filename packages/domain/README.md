@@ -1,19 +1,17 @@
 # @repo/domain
 
-Shared types and schemas for the [bEvr stack](../../README.md), built with
-Effect Schema.
+Shared types and schemas for the MCP Apps Effect Lab, built with Effect Schema.
 
 ## Overview
 
-This package provides type-safe schemas and utilities shared between the client
-and server applications. Uses Effect Schema for runtime validation and type
-generation.
+This package provides type-safe schemas and utilities shared across the
+workspace. Uses Effect Schema for runtime validation and type generation.
 
 ## Features
 
 - **Effect Schema Integration** - Runtime validation with compile-time types
 - **Shared Types** - Common interfaces used across apps
-- **Type Safety** - End-to-end type safety from client to server
+- **Type Safety** - End-to-end type safety across shared schemas
 - **Functional Programming** - Built with Effect ecosystem patterns
 
 ## Usage
@@ -21,7 +19,7 @@ generation.
 Import types and schemas in your apps:
 
 ```typescript
-// In client or server
+// In an app or package
 import { ApiResponse, UserSchema } from "@repo/domain";
 
 // Use types for API communication

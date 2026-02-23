@@ -1,8 +1,8 @@
-# MCP Server
+# MCP Apps Effect Server
 
 [Model Context Protocol](https://modelcontextprotocol.io/) server built with
-[Effect Platform](https://effect.website/docs/platform) and TypeScript, part of
-the [bEvr stack](../../README.md).
+[Effect Platform](https://effect.website/docs/platform) and TypeScript, focused
+on the MCP Apps specification and generative UI for chat applications.
 
 ## Stack
 
@@ -24,8 +24,8 @@ bun dev --filter=server-mcp
 # Build for production
 bun build --filter=server-mcp
 
-# Test MCP server functionality (MCPJam Inspector)
-bun inspector
+# Test MCP server functionality (MCP Apps inspector)
+bun run inspector
 ```
 
 The MCP server provides tools and resources for AI assistants via the Model
@@ -45,14 +45,14 @@ handling:
 
 ## Testing
 
-You can test the MCP server functionality using MCPJam Inspector:
+You can test the MCP server functionality using the MCP Apps inspector:
 
 ```bash
-bun inspector
+bun run inspector
 ```
 
-This will start an interactive session where you can test MCP tools and
-resources directly.
+This starts the MCP server in watch mode and opens an interactive session where
+you can test MCP tools, resources, and UI responses.
 
 ## Example Implementation
 
