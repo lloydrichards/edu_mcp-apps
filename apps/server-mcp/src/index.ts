@@ -1,6 +1,6 @@
 import { BunHttpServer, BunRuntime } from "@effect/platform-bun";
 import { Config, Effect, Layer, Schema } from "effect";
-import { McpSchema, McpServer, Tool, Toolkit } from "effect/unstable/ai";
+import { McpServer, Tool, Toolkit } from "effect/unstable/ai";
 import { HttpRouter, HttpServer } from "effect/unstable/http";
 
 const UiResourceUri = "ui://example/hello-app";
@@ -276,36 +276,28 @@ const ToolLayer = McpServer.toolkit(AiTools).pipe(
   ),
 );
 
-const UiToolMetaLayer = Layer.effectDiscard(
-  Effect.gen(function* () {
-    const server = yield* McpServer.McpServer;
-    const tool = new McpSchema.Tool({
-      name: "HelloUi",
-      title: "Hello MCP App",
-      description: "Render the Hello MCP App UI",
-      inputSchema: {
-        type: "object",
-        properties: {
-          message: { type: "string" },
-        },
-        required: ["message"],
+class UiTools extends Toolkit.make(Tool.make("HelloUi", {
+    description: "Render the Hello MCP App UI",
+    parameters: Schema.Struct({
+      message: Schema.String,
+    }),
+    success: Schema.String,
+    failure: Schema.Never,
+  })
+    .annotate(Tool.Title, "Hello MCP App")
+    .annotate(Tool.Meta, {
+      ui: {
+        resourceUri: UiResourceUri,
+        visibility: ["app"],
       },
-      _meta: {
-        ui: {
-          resourceUri: UiResourceUri,
-          visibility: ["model", "app"],
-        },
-      },
-    });
-    const handler = (payload: { message?: string }) =>
-      Effect.succeed({
-        message: payload?.message ?? "",
-      });
-    yield* server.addTool({
-      tool,
-      handle: handler as any,
-    });
-  }).pipe(Effect.provide(McpServer.McpServer.layer)),
+    })) {}
+
+const UiToolLayer = McpServer.toolkit(UiTools).pipe(
+  Layer.provide(
+    UiTools.toLayer({
+      HelloUi: ({ message }) => Effect.succeed(message),
+    }),
+  ),
 );
 
 // Define Live API
@@ -313,7 +305,7 @@ const McpLive = Layer.mergeAll(
   ResourceLayer,
   PromptLayer,
   ToolLayer,
-  UiToolMetaLayer,
+  UiToolLayer,
 );
 
 const ServerConfig = Config.all({

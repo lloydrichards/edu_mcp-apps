@@ -1,13 +1,17 @@
+diff --git a/node_modules/server-mcp/node_modules/effect/.bun-tag-2679128afc46689 b/.bun-tag-2679128afc46689
+new file mode 100644
+index 0000000000000000000000000000000000000000..e69de29bb2d1d6434b8b29ae775ad8c2e48c5391
+diff --git a/node_modules/server-mcp/node_modules/effect/.bun-tag-53e67007a1267010 b/.bun-tag-53e67007a1267010
+new file mode 100644
+index 0000000000000000000000000000000000000000..e69de29bb2d1d6434b8b29ae775ad8c2e48c5391
+diff --git a/node_modules/server-mcp/node_modules/effect/.bun-tag-d974a52347448aba b/.bun-tag-d974a52347448aba
+new file mode 100644
+index 0000000000000000000000000000000000000000..e69de29bb2d1d6434b8b29ae775ad8c2e48c5391
 diff --git a/dist/unstable/ai/McpSchema.d.ts b/dist/unstable/ai/McpSchema.d.ts
-index 0b41fb36d21a9bb8e0f24403f62d44667df318e5..d63869194fac3e5d73dc13c1686a6779f4f2fadc 100644
+index 0b41fb36d21a9bb8e0f24403f62d44667df318e5..e5fece68362fa7b7e9f92729aa43f91f7f5edd7c 100644
 --- a/dist/unstable/ai/McpSchema.d.ts
 +++ b/dist/unstable/ai/McpSchema.d.ts
-@@ -829,10 +829,12 @@ declare const Resource_base: Schema.ExtendableClass<Resource, Schema.Struct<{
-      * The MIME type of this resource, if known.
-      */
-     readonly mimeType: Schema.decodeTo<Schema.optional<Schema.String>, Schema.optionalKey<Schema.String>, never, never>;
-+    readonly _meta: Schema.decodeTo<Schema.optional<Schema.$Record<Schema.String, Schema.Any>>, Schema.optionalKey<Schema.$Record<Schema.String, Schema.Any>>, never, never>;
-     /**
+@@ -833,6 +833,7 @@ declare const Resource_base: Schema.ExtendableClass<Resource, Schema.Struct<{
       * Optional annotations for the client.
       */
      readonly annotations: Schema.decodeTo<Schema.optional<typeof Annotations>, Schema.optionalKey<typeof Annotations>, never, never>;
@@ -15,12 +19,7 @@ index 0b41fb36d21a9bb8e0f24403f62d44667df318e5..d63869194fac3e5d73dc13c1686a6779
      /**
       * The size of the raw resource content, in bytes (i.e., before base64
       * encoding or any tokenization), if known.
-@@ -875,10 +877,12 @@ declare const ResourceTemplate_base: Schema.ExtendableClass<ResourceTemplate, Sc
-      * be included if all resources matching this template have the same type.
-      */
-     readonly mimeType: Schema.decodeTo<Schema.optional<Schema.String>, Schema.optionalKey<Schema.String>, never, never>;
-+    readonly _meta: Schema.decodeTo<Schema.optional<Schema.$Record<Schema.String, Schema.Any>>, Schema.optionalKey<Schema.$Record<Schema.String, Schema.Any>>, never, never>;
-     /**
+@@ -879,6 +880,7 @@ declare const ResourceTemplate_base: Schema.ExtendableClass<ResourceTemplate, Sc
       * Optional annotations for the client.
       */
      readonly annotations: Schema.decodeTo<Schema.optional<typeof Annotations>, Schema.optionalKey<typeof Annotations>, never, never>;
@@ -28,7 +27,55 @@ index 0b41fb36d21a9bb8e0f24403f62d44667df318e5..d63869194fac3e5d73dc13c1686a6779
  }>, {}>;
  /**
   * A template description for resources available on the server.
-@@ -1710,6 +1714,7 @@ declare const Tool_base: Schema.ExtendableClass<Tool, Schema.Struct<{
+@@ -897,6 +899,7 @@ declare const ResourceContents_base: Schema.Opaque<ResourceContents, Schema.Stru
+      * The MIME type of this resource, if known.
+      */
+     readonly mimeType: Schema.decodeTo<Schema.optional<Schema.String>, Schema.optionalKey<Schema.String>, never, never>;
++    readonly _meta: Schema.decodeTo<Schema.optional<Schema.$Record<Schema.String, Schema.Any>>, Schema.optionalKey<Schema.$Record<Schema.String, Schema.Any>>, never, never>;
+ }>, {}> & Omit<Schema.Struct<{
+     /**
+      * The URI of this resource.
+@@ -906,6 +909,7 @@ declare const ResourceContents_base: Schema.Opaque<ResourceContents, Schema.Stru
+      * The MIME type of this resource, if known.
+      */
+     readonly mimeType: Schema.decodeTo<Schema.optional<Schema.String>, Schema.optionalKey<Schema.String>, never, never>;
++    readonly _meta: Schema.decodeTo<Schema.optional<Schema.$Record<Schema.String, Schema.Any>>, Schema.optionalKey<Schema.$Record<Schema.String, Schema.Any>>, never, never>;
+ }>, "Type">;
+ /**
+  * The contents of a specific resource or sub-resource.
+@@ -929,6 +933,7 @@ declare const TextResourceContents_base: Schema.Opaque<TextResourceContents, Sch
+      * The MIME type of this resource, if known.
+      */
+     readonly mimeType: Schema.decodeTo<Schema.optional<Schema.String>, Schema.optionalKey<Schema.String>, never, never>;
++    readonly _meta: Schema.decodeTo<Schema.optional<Schema.$Record<Schema.String, Schema.Any>>, Schema.optionalKey<Schema.$Record<Schema.String, Schema.Any>>, never, never>;
+ }>, {}> & Omit<Schema.Struct<{
+     /**
+      * The text of the item. This must only be set if the item can actually be
+@@ -943,6 +948,7 @@ declare const TextResourceContents_base: Schema.Opaque<TextResourceContents, Sch
+      * The MIME type of this resource, if known.
+      */
+     readonly mimeType: Schema.decodeTo<Schema.optional<Schema.String>, Schema.optionalKey<Schema.String>, never, never>;
++    readonly _meta: Schema.decodeTo<Schema.optional<Schema.$Record<Schema.String, Schema.Any>>, Schema.optionalKey<Schema.$Record<Schema.String, Schema.Any>>, never, never>;
+ }>, "Type">;
+ /**
+  * The contents of a text resource, which can be represented as a string.
+@@ -965,6 +971,7 @@ declare const BlobResourceContents_base: Schema.Opaque<BlobResourceContents, Sch
+      * The MIME type of this resource, if known.
+      */
+     readonly mimeType: Schema.decodeTo<Schema.optional<Schema.String>, Schema.optionalKey<Schema.String>, never, never>;
++    readonly _meta: Schema.decodeTo<Schema.optional<Schema.$Record<Schema.String, Schema.Any>>, Schema.optionalKey<Schema.$Record<Schema.String, Schema.Any>>, never, never>;
+ }>, {}> & Omit<Schema.Struct<{
+     /**
+      * The binary data of the item decoded from a base64-encoded string.
+@@ -978,6 +985,7 @@ declare const BlobResourceContents_base: Schema.Opaque<BlobResourceContents, Sch
+      * The MIME type of this resource, if known.
+      */
+     readonly mimeType: Schema.decodeTo<Schema.optional<Schema.String>, Schema.optionalKey<Schema.String>, never, never>;
++    readonly _meta: Schema.decodeTo<Schema.optional<Schema.$Record<Schema.String, Schema.Any>>, Schema.optionalKey<Schema.$Record<Schema.String, Schema.Any>>, never, never>;
+ }>, "Type">;
+ /**
+  * The contents of a binary resource, which can be represented as an Uint8Array
+@@ -1710,6 +1718,7 @@ declare const Tool_base: Schema.ExtendableClass<Tool, Schema.Struct<{
       * Optional additional tool information.
       */
      readonly annotations: Schema.decodeTo<Schema.optional<typeof ToolAnnotations>, Schema.optionalKey<typeof ToolAnnotations>, never, never>;
@@ -37,15 +84,10 @@ index 0b41fb36d21a9bb8e0f24403f62d44667df318e5..d63869194fac3e5d73dc13c1686a6779
  /**
   * Definition for a tool the client can call.
 diff --git a/dist/unstable/ai/McpSchema.js b/dist/unstable/ai/McpSchema.js
-index afde78137150fe6935ccc956abebc2453bd5edf4..67f10d8ea9ee39442b75e6329ada56e621f32862 100644
+index afde78137150fe6935ccc956abebc2453bd5edf4..9f18a3f19bc648f56ba41908ef69fbacfcc91dc0 100644
 --- a/dist/unstable/ai/McpSchema.js
 +++ b/dist/unstable/ai/McpSchema.js
-@@ -506,10 +506,12 @@ export class Resource extends /*#__PURE__*/Schema.Class("@effect/ai/McpSchema/Re
-    * The MIME type of this resource, if known.
-    */
-   mimeType: /*#__PURE__*/optional(Schema.String),
-+  _meta: /*#__PURE__*/optional(/*#__PURE__*/Schema.Record(Schema.String, Schema.Any)),
-   /**
+@@ -510,6 +510,7 @@ export class Resource extends /*#__PURE__*/Schema.Class("@effect/ai/McpSchema/Re
     * Optional annotations for the client.
     */
    annotations: /*#__PURE__*/optional(Annotations),
@@ -53,15 +95,47 @@ index afde78137150fe6935ccc956abebc2453bd5edf4..67f10d8ea9ee39442b75e6329ada56e6
    /**
     * The size of the raw resource content, in bytes (i.e., before base64
     * encoding or any tokenization), if known.
-@@ -550,6 +552,7 @@ export class ResourceTemplate extends /*#__PURE__*/Schema.Class("@effect/ai/McpS
-    * be included if all resources matching this template have the same type.
-    */
-   mimeType: /*#__PURE__*/optional(Schema.String),
-+  _meta: /*#__PURE__*/optional(/*#__PURE__*/Schema.Record(Schema.String, Schema.Any)),
+@@ -553,7 +554,8 @@ export class ResourceTemplate extends /*#__PURE__*/Schema.Class("@effect/ai/McpS
    /**
     * Optional annotations for the client.
     */
-@@ -1031,7 +1034,8 @@ export class Tool extends /*#__PURE__*/Schema.Class("@effect/ai/McpSchema/Tool")
+-  annotations: /*#__PURE__*/optional(Annotations)
++  annotations: /*#__PURE__*/optional(Annotations),
++  _meta: /*#__PURE__*/optional(/*#__PURE__*/Schema.Record(Schema.String, Schema.Any))
+ }) {}
+ /**
+  * The contents of a specific resource or sub-resource.
+@@ -569,7 +571,8 @@ export class ResourceContents extends /*#__PURE__*/Schema.Opaque()(/*#__PURE__*/
+   /**
+    * The MIME type of this resource, if known.
+    */
+-  mimeType: /*#__PURE__*/optional(Schema.String)
++  mimeType: /*#__PURE__*/optional(Schema.String),
++  _meta: /*#__PURE__*/optional(/*#__PURE__*/Schema.Record(Schema.String, Schema.Any))
+ })) {}
+ /**
+  * The contents of a text resource, which can be represented as a string.
+@@ -583,7 +586,8 @@ export class TextResourceContents extends /*#__PURE__*/Schema.Opaque()(/*#__PURE
+    * The text of the item. This must only be set if the item can actually be
+    * represented as text (not binary data).
+    */
+-  text: Schema.String
++  text: Schema.String,
++  _meta: /*#__PURE__*/optional(/*#__PURE__*/Schema.Record(Schema.String, Schema.Any))
+ })) {}
+ /**
+  * The contents of a binary resource, which can be represented as an Uint8Array
+@@ -596,7 +600,8 @@ export class BlobResourceContents extends /*#__PURE__*/Schema.Opaque()(/*#__PURE
+   /**
+    * The binary data of the item decoded from a base64-encoded string.
+    */
+-  blob: Schema.Uint8Array
++  blob: Schema.Uint8Array,
++  _meta: /*#__PURE__*/optional(/*#__PURE__*/Schema.Record(Schema.String, Schema.Any))
+ })) {}
+ /**
+  * The server's response to a resources/list request from the client.
+@@ -1031,7 +1036,8 @@ export class Tool extends /*#__PURE__*/Schema.Class("@effect/ai/McpSchema/Tool")
    /**
     * Optional additional tool information.
     */
@@ -71,3 +145,79 @@ index afde78137150fe6935ccc956abebc2453bd5edf4..67f10d8ea9ee39442b75e6329ada56e6
  }) {}
  /**
   * The server's response to a tools/list request from the client.
+diff --git a/dist/unstable/ai/McpServer.js b/dist/unstable/ai/McpServer.js
+index 19b86ea47c0cb2477d3f0964cd4fa9797fdf44d5..6f1b278ecdbafd3042fb84fd3eea5e45b2a0efd8 100644
+--- a/dist/unstable/ai/McpServer.js
++++ b/dist/unstable/ai/McpServer.js
+@@ -359,6 +359,7 @@ export const registerToolkit = /*#__PURE__*/Effect.fnUntraced(function* (toolkit
+   const built = yield* toolkit;
+   const services = yield* Effect.services();
+   for (const tool of Object.values(built.tools)) {
++    const toolMeta = ServiceMap.getOption(tool.annotations, Tool.Meta).pipe(Option.getOrUndefined);
+     const mcpTool = new McpTool({
+       name: tool.name,
+       description: Tool.getDescription(tool),
+@@ -371,7 +372,8 @@ export const registerToolkit = /*#__PURE__*/Effect.fnUntraced(function* (toolkit
+         destructiveHint: ServiceMap.get(tool.annotations, Tool.Destructive),
+         idempotentHint: ServiceMap.get(tool.annotations, Tool.Idempotent),
+         openWorldHint: ServiceMap.get(tool.annotations, Tool.OpenWorld)
+-      }
++      },
++      _meta: toolMeta
+     });
+     yield* registry.addTool({
+       tool: mcpTool,
+diff --git a/dist/unstable/ai/Tool.d.ts b/dist/unstable/ai/Tool.d.ts
+index 96ee09ed9d324fdce9388b5171f326c616809b5d..6d6851dd3d7c2effddd2689d87d349487f54f03a 100644
+--- a/dist/unstable/ai/Tool.d.ts
++++ b/dist/unstable/ai/Tool.d.ts
+@@ -1121,6 +1121,23 @@ declare const Title_base: ServiceMap.ServiceClass<Title, "effect/ai/Tool/Title",
+  */
+ export declare class Title extends Title_base {
+ }
++declare const Meta_base: ServiceMap.ServiceClass<Meta, "effect/ai/Tool/Meta", Record<string, unknown>>;
++/**
++ * Annotation for providing tool metadata for MCP.
++ *
++ * @example
++ * ```ts
++ * import { Tool } from "effect/unstable/ai"
++ *
++ * const helloUi = Tool.make("HelloUi", {})
++ *   .annotate(Tool.Meta, { ui: { resourceUri: "ui://example/hello-app" } })
++ * ```
++ *
++ * @since 1.0.0
++ * @category annotations
++ */
++export declare class Meta extends Meta_base {
++}
+ /**
+  * Annotation indicating whether a tool only reads data without making changes.
+  *
+diff --git a/dist/unstable/ai/Tool.js b/dist/unstable/ai/Tool.js
+index 3c5372115a5db6f61fd9cb7d7545323c2c86c8e8..495855ac2c35e5374f58743fdf57614ed1f47577 100644
+--- a/dist/unstable/ai/Tool.js
++++ b/dist/unstable/ai/Tool.js
+@@ -520,6 +520,21 @@ export const getJsonSchemaFromSchema = (schema, options) => {
+  * @category annotations
+  */
+ export class Title extends /*#__PURE__*/ServiceMap.Service()("effect/ai/Tool/Title") {}
++/**
++ * Annotation for providing tool metadata for MCP.
++ *
++ * @example
++ * ```ts
++ * import { Tool } from "effect/unstable/ai"
++ *
++ * const helloUi = Tool.make("HelloUi", {})
++ *   .annotate(Tool.Meta, { ui: { resourceUri: "ui://example/hello-app" } })
++ * ```
++ *
++ * @since 1.0.0
++ * @category annotations
++ */
++export class Meta extends /*#__PURE__*/ServiceMap.Service()("effect/ai/Tool/Meta") {}
+ /**
+  * Annotation indicating whether a tool only reads data without making changes.
+  *
