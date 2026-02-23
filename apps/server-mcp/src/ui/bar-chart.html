@@ -1,0 +1,407 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Bar Chart</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/sszvis@3.4.0/build/sszvis.css"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        color-scheme: light dark;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        font-family: var(--font-sans, system-ui, sans-serif);
+        background: var(--color-background-primary, #fff);
+        color: var(--color-text-primary, #111);
+      }
+      .wrap {
+        padding: 16px;
+      }
+      header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 10px;
+      }
+      h1 {
+        margin: 0;
+        font-size: 16px;
+        font-weight: 600;
+      }
+      .meta {
+        font-size: 12px;
+        color: var(--color-text-secondary, #555);
+      }
+      #chart-root {
+        width: 100%;
+        min-height: 260px;
+      }
+      .controls {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+      button {
+        border: 1px solid var(--color-border-secondary, rgba(0, 0, 0, 0.1));
+        cursor: pointer;
+        padding: 6px 10px;
+        border-radius: var(--border-radius-md, 8px);
+        background: var(--color-background-primary, #fff);
+        color: var(--color-text-primary, #111);
+        font-weight: 600;
+        font-size: 12px;
+      }
+      button:disabled {
+        opacity: 0.6;
+        cursor: default;
+      }
+      .empty {
+        padding: 20px 0;
+        text-align: center;
+        font-size: 13px;
+        color: var(--color-text-secondary, #555);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <header>
+        <div>
+          <h1 id="title">Bar Chart</h1>
+          <div class="meta" id="subtitle">Waiting for data…</div>
+          <div class="meta" id="status">Initializing…</div>
+        </div>
+      </header>
+      <div id="chart-root">
+        <div class="empty" id="empty">No data to render.</div>
+      </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sszvis@3.4.0/build/sszvis.min.js"></script>
+    <script>
+      let nextId = 1;
+      const titleEl = document.getElementById("title");
+      const subtitleEl = document.getElementById("subtitle");
+      const statusEl = document.getElementById("status");
+      const emptyEl = document.getElementById("empty");
+      const chartRoot = document.getElementById("chart-root");
+
+      const state = {
+        data: [],
+        categories: [],
+        selection: [],
+      };
+
+      let currentProps = {};
+      let resizeBound = false;
+
+      const queryProps = sszvis
+        .responsiveProps()
+        .prop("barPadding", {
+          palm: 0.4,
+          _: 0.2,
+        })
+        .prop("bottomPadding", {
+          palm: 140,
+          _: 60,
+        })
+        .prop("leftPadding", {
+          _: null,
+        })
+        .prop("slant", {
+          palm: "vertical",
+          _: "horizontal",
+        })
+        .prop("yLabelFormat", {
+          _: () => sszvis.formatNumber,
+        });
+
+      const xAcc = sszvis.prop("category");
+      const yAcc = sszvis.prop("value");
+
+      function sendRequest(method, params) {
+        const id = nextId++;
+        window.parent.postMessage({ jsonrpc: "2.0", id, method, params }, "*");
+        return new Promise((resolve, reject) => {
+          function listener(event) {
+            if (!event.data || event.data.id !== id) return;
+            window.removeEventListener("message", listener);
+            if (event.data.result) return resolve(event.data.result);
+            reject(event.data.error || new Error("Request failed"));
+          }
+          window.addEventListener("message", listener);
+        });
+      }
+
+      function sendNotification(method, params) {
+        window.parent.postMessage({ jsonrpc: "2.0", method, params }, "*");
+      }
+
+      function setStatus(text) {
+        statusEl.textContent = text;
+      }
+
+      function setSubtitle(text) {
+        subtitleEl.textContent = text;
+      }
+
+      function clearChart() {
+        chartRoot.innerHTML = "";
+        emptyEl.style.display = "block";
+        chartRoot.appendChild(emptyEl);
+      }
+
+      function safeNumber(value) {
+        if (typeof value === "number" && Number.isFinite(value)) return value;
+        if (typeof value === "string" && value.trim() !== "") {
+          const parsed = Number.parseFloat(value);
+          return Number.isFinite(parsed) ? parsed : null;
+        }
+        return null;
+      }
+
+      function normalizePayload(payload) {
+        if (!payload) return null;
+        const data = Array.isArray(payload.data) ? payload.data : [];
+        const cleaned = data
+          .map((item) => ({
+            category:
+              typeof item?.category === "string"
+                ? item.category
+                : String(item?.category ?? ""),
+            value: safeNumber(item?.value),
+          }))
+          .filter((item) => item.category && item.value !== null);
+        if (!cleaned.length) return null;
+        return {
+          data: cleaned,
+          props: payload.props || {},
+        };
+      }
+
+
+      function renderChart(payload) {
+        const normalized = normalizePayload(payload);
+        if (!normalized) {
+          clearChart();
+          setStatus("No data to render");
+          return;
+        }
+
+        if (!window.sszvis || !window.d3) {
+          clearChart();
+          setStatus("Chart library failed to load");
+          return;
+        }
+
+        const { data, props } = normalized;
+        currentProps = props || {};
+        state.data = data;
+        state.categories = data.map(xAcc);
+        state.selection = [];
+
+        const updatedAt = new Date().toLocaleTimeString();
+        titleEl.textContent = props.title || "Bar Chart";
+        setSubtitle(`${data.length} categories · Updated ${updatedAt}`);
+        emptyEl.style.display = "none";
+
+        render();
+        setStatus("Rendered");
+      }
+
+      function render() {
+        if (!state.data.length) return;
+
+        const yMax = d3.max(state.data, yAcc);
+        const maxWidth = safeNumber(currentProps.maxWidth) || 800;
+
+        const props = queryProps(sszvis.measureDimensions("#chart-root"));
+        const bounds = sszvis.bounds(
+          {
+            top: 3,
+            bottom: props.bottomPadding,
+            left:
+              props.leftPadding == null
+                ? sszvis.measureAxisLabel(props.yLabelFormat(yMax))
+                : props.leftPadding,
+          },
+          "#chart-root",
+        );
+        const chartDimensions = sszvis.dimensionsVerticalBarChart(
+          Math.min(maxWidth, bounds.innerWidth),
+          state.categories.length,
+        );
+
+        const xScale = d3
+          .scaleBand()
+          .domain(state.categories)
+          .padding(chartDimensions.padRatio)
+          .paddingOuter(props.barPadding)
+          .range([0, chartDimensions.totalWidth]);
+
+        const heightScale = d3
+          .scaleLinear()
+          .domain([0, yMax])
+          .range([0, bounds.innerHeight]);
+
+        const yPosScale = heightScale
+          .copy()
+          .range([...heightScale.range()].reverse());
+
+        const cScale = sszvis.scaleQual12();
+        const cScaleDark = cScale.darker();
+
+        const chartLayer = sszvis
+          .createSvgLayer("#chart-root", bounds)
+          .datum(state.data);
+
+        const tooltipLayer = sszvis
+          .createHtmlLayer("#chart-root", bounds)
+          .datum(state.selection);
+
+        const barGen = sszvis
+          .bar()
+          .x(sszvis.compose(xScale, xAcc))
+          .y(
+            sszvis.compose(
+              nanFallback(yPosScale.range()[0]),
+              yPosScale,
+              yAcc,
+            ),
+          )
+          .width(xScale.bandwidth())
+          .height(sszvis.compose(heightScale, yAcc))
+          .centerTooltip(true)
+          .fill((d) => (isSelected(d) ? cScaleDark(d) : cScale(d)));
+
+        const xAxis = sszvis.axisX
+          .ordinal()
+          .scale(xScale)
+          .orient("bottom")
+          .slant(props.slant);
+
+        if (props.slant === "horizontal") {
+          xAxis.textWrap(xScale.step());
+        }
+
+        const yAxis = sszvis.axisY().scale(yPosScale).orient("right");
+
+        const tooltipHeader = sszvis
+          .modularTextHTML()
+          .bold((d) => {
+            const yValue = yAcc(d);
+            return isNaN(yValue) ? "n/a" : sszvis.formatNumber(yValue);
+          })
+          .plain(currentProps.valueLabel || "Value");
+
+        const tooltip = sszvis
+          .tooltip()
+          .renderInto(tooltipLayer)
+          .orientation(sszvis.fitTooltip("bottom", bounds))
+          .header(tooltipHeader)
+          .visible(isSelected);
+
+        chartLayer.attr(
+          "transform",
+          sszvis.translateString(
+            bounds.innerWidth / 2 - chartDimensions.totalWidth / 2,
+            bounds.padding.top,
+          ),
+        );
+
+        const bars = chartLayer
+          .selectGroup("bars")
+          .attr("transform", sszvis.translateString(bounds.padding.left, 0))
+          .call(barGen);
+
+        bars.selectAll("[data-tooltip-anchor]").call(tooltip);
+
+        bars
+          .selectGroup("xAxis")
+          .attr("transform", sszvis.translateString(0, bounds.innerHeight))
+          .call(xAxis);
+
+        chartLayer.selectGroup("yAxis").call(yAxis);
+
+        const interactionLayer = sszvis
+          .move()
+          .xScale(xScale)
+          .yScale(yPosScale)
+          .on("move", actions.showTooltip)
+          .on("end", actions.hideTooltip);
+
+        bars.selectGroup("interaction").call(interactionLayer);
+
+        if (!resizeBound) {
+          sszvis.viewport.on("resize", actions.resize);
+          resizeBound = true;
+        }
+      }
+
+      const actions = {
+        showTooltip(_event, category) {
+          state.selection = state.data.filter((d) => xAcc(d) === category);
+          render();
+        },
+        hideTooltip() {
+          state.selection = [];
+          render();
+        },
+        resize() {
+          render();
+        },
+      };
+
+      function isSelected(d) {
+        return sszvis.contains(state.selection, d);
+      }
+
+      function nanFallback(fallbackValue) {
+        return (d) => (isNaN(d) ? fallbackValue : d);
+      }
+
+      window.addEventListener("message", (event) => {
+        const data = event.data;
+        if (!data || !data.method) return;
+        if (data.method === "ui/notifications/tool-result") {
+          if (data.params?.isError) {
+            const message = data.params?.content?.[0]?.text || "Tool error";
+            setStatus(message);
+            return;
+          }
+          const structured = data.params?.structuredContent;
+          if (structured?.data) {
+            renderChart(structured);
+            return;
+          }
+          const text = data.params?.content?.[0]?.text;
+          if (text) {
+            try {
+              renderChart(JSON.parse(text));
+              return;
+            } catch (_err) {
+              setStatus("Failed to parse tool result");
+            }
+          }
+        }
+      });
+
+      sendRequest("ui/initialize", {
+        appCapabilities: {},
+        appInfo: { name: "bar-chart", version: "0.1.0" },
+        protocolVersion: "2025-06-18",
+      }).then(() => {
+        sendNotification("ui/notifications/initialized", {});
+        setStatus("Ready for data");
+      });
+    </script>
+  </body>
+</html>
