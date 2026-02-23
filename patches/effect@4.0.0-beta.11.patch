@@ -1,5 +1,8 @@
+diff --git a/node_modules/server-mcp/node_modules/effect/.bun-tag-971880a22c19074 b/.bun-tag-971880a22c19074
+new file mode 100644
+index 0000000000000000000000000000000000000000..e69de29bb2d1d6434b8b29ae775ad8c2e48c5391
 diff --git a/dist/unstable/ai/McpSchema.d.ts b/dist/unstable/ai/McpSchema.d.ts
-index 0b41fb36d21a9bb8e0f24403f62d44667df318e5..3cf61fcb3edeadf6585cdb1c0479cb49e7a07c5e 100644
+index 0b41fb36d21a9bb8e0f24403f62d44667df318e5..bb0e3542969f39c5d0e62df305fbd84d1d42c37c 100644
 --- a/dist/unstable/ai/McpSchema.d.ts
 +++ b/dist/unstable/ai/McpSchema.d.ts
 @@ -833,6 +833,7 @@ declare const Resource_base: Schema.ExtendableClass<Resource, Schema.Struct<{
@@ -42,31 +45,7 @@ index 0b41fb36d21a9bb8e0f24403f62d44667df318e5..3cf61fcb3edeadf6585cdb1c0479cb49
  }>, {}> & Omit<Schema.Struct<{
      /**
       * The text of the item. This must only be set if the item can actually be
-@@ -943,6 +948,7 @@ declare const TextResourceContents_base: Schema.Opaque<TextResourceContents, Sch
-      * The MIME type of this resource, if known.
-      */
-     readonly mimeType: Schema.decodeTo<Schema.optional<Schema.String>, Schema.optionalKey<Schema.String>, never, never>;
-+    readonly _meta: Schema.decodeTo<Schema.optional<Schema.$Record<Schema.String, Schema.Any>>, Schema.optionalKey<Schema.$Record<Schema.String, Schema.Any>>, never, never>;
- }>, "Type">;
- /**
-  * The contents of a text resource, which can be represented as a string.
-@@ -965,6 +971,7 @@ declare const BlobResourceContents_base: Schema.Opaque<BlobResourceContents, Sch
-      * The MIME type of this resource, if known.
-      */
-     readonly mimeType: Schema.decodeTo<Schema.optional<Schema.String>, Schema.optionalKey<Schema.String>, never, never>;
-+    readonly _meta: Schema.decodeTo<Schema.optional<Schema.$Record<Schema.String, Schema.Any>>, Schema.optionalKey<Schema.$Record<Schema.String, Schema.Any>>, never, never>;
- }>, {}> & Omit<Schema.Struct<{
-     /**
-      * The binary data of the item decoded from a base64-encoded string.
-@@ -978,6 +985,7 @@ declare const BlobResourceContents_base: Schema.Opaque<BlobResourceContents, Sch
-      * The MIME type of this resource, if known.
-      */
-     readonly mimeType: Schema.decodeTo<Schema.optional<Schema.String>, Schema.optionalKey<Schema.String>, never, never>;
-+    readonly _meta: Schema.decodeTo<Schema.optional<Schema.$Record<Schema.String, Schema.Any>>, Schema.optionalKey<Schema.$Record<Schema.String, Schema.Any>>, never, never>;
- }>, "Type">;
- /**
-  * The contents of a binary resource, which can be represented as an Uint8Array
-@@ -1710,6 +1718,7 @@ declare const Tool_base: Schema.ExtendableClass<Tool, Schema.Struct<{
+@@ -1710,6 +1715,7 @@ declare const Tool_base: Schema.ExtendableClass<Tool, Schema.Struct<{
       * Optional additional tool information.
       */
      readonly annotations: Schema.decodeTo<Schema.optional<typeof ToolAnnotations>, Schema.optionalKey<typeof ToolAnnotations>, never, never>;
@@ -137,27 +116,48 @@ index afde78137150fe6935ccc956abebc2453bd5edf4..a3e8c64afd7dc3e554cfd0c7bb1dd042
  /**
   * The server's response to a tools/list request from the client.
 diff --git a/dist/unstable/ai/McpServer.js b/dist/unstable/ai/McpServer.js
-index 19b86ea47c0cb2477d3f0964cd4fa9797fdf44d5..6f1b278ecdbafd3042fb84fd3eea5e45b2a0efd8 100644
+index 19b86ea47c0cb2477d3f0964cd4fa9797fdf44d5..3e1c7ab7f39f883c4b0902d1fee410b6a89ff9c8 100644
 --- a/dist/unstable/ai/McpServer.js
 +++ b/dist/unstable/ai/McpServer.js
-@@ -359,6 +359,7 @@ export const registerToolkit = /*#__PURE__*/Effect.fnUntraced(function* (toolkit
+@@ -358,11 +358,12 @@ export const registerToolkit = /*#__PURE__*/Effect.fnUntraced(function* (toolkit
+   const registry = yield* McpServer;
    const built = yield* toolkit;
    const services = yield* Effect.services();
-   for (const tool of Object.values(built.tools)) {
-+    const toolMeta = ServiceMap.getOption(tool.annotations, Tool.Meta).pipe(Option.getOrUndefined);
-     const mcpTool = new McpTool({
-       name: tool.name,
-       description: Tool.getDescription(tool),
-@@ -371,7 +372,8 @@ export const registerToolkit = /*#__PURE__*/Effect.fnUntraced(function* (toolkit
+-  for (const tool of Object.values(built.tools)) {
+-    const mcpTool = new McpTool({
+-      name: tool.name,
+-      description: Tool.getDescription(tool),
+-      inputSchema: Tool.getJsonSchema(tool),
++    for (const tool of Object.values(built.tools)) {
++      const toolMeta = ServiceMap.getOption(tool.annotations, Tool.Meta).pipe(Option.getOrUndefined);
++      const mcpTool = new McpTool({
++        name: tool.name,
++        description: Tool.getDescription(tool),
++        inputSchema: Tool.getJsonSchema(tool),
+       annotations: {
+         ...ServiceMap.getOption(tool.annotations, Tool.Title).pipe(Option.map(title => ({
+           title
+@@ -371,8 +372,9 @@ export const registerToolkit = /*#__PURE__*/Effect.fnUntraced(function* (toolkit
          destructiveHint: ServiceMap.get(tool.annotations, Tool.Destructive),
          idempotentHint: ServiceMap.get(tool.annotations, Tool.Idempotent),
          openWorldHint: ServiceMap.get(tool.annotations, Tool.OpenWorld)
 -      }
+-    });
 +      },
 +      _meta: toolMeta
-     });
++      });
      yield* registry.addTool({
        tool: mcpTool,
+       handle(payload) {
+@@ -673,7 +675,7 @@ const layerHandlers = serverInfo => ClientRpcs.toLayer(Effect.gen(function* () {
+       });
+     },
+     "completion/complete": server.completion,
+-    "logging/setLevel": () => InternalError.notImplemented.asEffect(),
++    "logging/setLevel": () => Effect.void,
+     "prompts/get": server.getPromptResult,
+     "prompts/list": () => Effect.sync(() => new ListPromptsResult({
+       prompts: server.prompts
 diff --git a/dist/unstable/ai/Tool.d.ts b/dist/unstable/ai/Tool.d.ts
 index 96ee09ed9d324fdce9388b5171f326c616809b5d..6d6851dd3d7c2effddd2689d87d349487f54f03a 100644
 --- a/dist/unstable/ai/Tool.d.ts
