@@ -19,7 +19,7 @@ index a9b2dfd82aba5cb0e8925cb9db8c8587724e0520..fd294e33a31283cff27106747502003c
     * attach additional metadata to resources.
     */
 -  _meta: /*#__PURE__*/optional(/*#__PURE__*/Schema.Record(Schema.String, Schema.Unknown))
-+  _meta: /*#__PURE__*/optional(/*#__PURE__*/Schema.Record(Schema.String, Schema.Any))
++  _meta: /*#__PURE__*/optional(/*#__PURE__*/Schema.Record(Schema.String, Schema.Json))
  }) {}
  /**
   * A template description for resources available on the server.
@@ -28,7 +28,7 @@ index a9b2dfd82aba5cb0e8925cb9db8c8587724e0520..fd294e33a31283cff27106747502003c
     * Optional additional metadata for the client.
     */
 -  _meta: /*#__PURE__*/optional(/*#__PURE__*/Schema.Record(Schema.String, Schema.Unknown))
-+  _meta: /*#__PURE__*/optional(/*#__PURE__*/Schema.Record(Schema.String, Schema.Any))
++  _meta: /*#__PURE__*/optional(/*#__PURE__*/Schema.Record(Schema.String, Schema.Json))
  }) {}
  /**
   * The contents of a specific resource or sub-resource.
@@ -37,7 +37,7 @@ index a9b2dfd82aba5cb0e8925cb9db8c8587724e0520..fd294e33a31283cff27106747502003c
     * Optional additional metadata for the client.
     */
 -  _meta: /*#__PURE__*/optional(/*#__PURE__*/Schema.Record(Schema.String, Schema.Unknown))
-+  _meta: /*#__PURE__*/optional(/*#__PURE__*/Schema.Record(Schema.String, Schema.Any))
++  _meta: /*#__PURE__*/optional(/*#__PURE__*/Schema.Record(Schema.String, Schema.Json))
  })) {}
  /**
   * The contents of a text resource, which can be represented as a string.
@@ -46,7 +46,7 @@ index a9b2dfd82aba5cb0e8925cb9db8c8587724e0520..fd294e33a31283cff27106747502003c
     * attach additional metadata to resources.
     */
 -  _meta: /*#__PURE__*/optional(/*#__PURE__*/Schema.Record(Schema.String, Schema.Unknown))
-+  _meta: /*#__PURE__*/optional(/*#__PURE__*/Schema.Record(Schema.String, Schema.Any))
++  _meta: /*#__PURE__*/optional(/*#__PURE__*/Schema.Record(Schema.String, Schema.Json))
  }) {}
  /**
   * The server's response to a tools/list request from the client.
