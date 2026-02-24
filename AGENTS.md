@@ -37,6 +37,29 @@ Bun 1.2+, TypeScript 5.9, Effect 3.19, React 19, Vite 7, Vitest 4, Tailwind CSS
   composition for DI
 - **Error handling**: Use Effect error channel; avoid try/catch
 
+## Dependency Patching (.patch)
+
+Use Bun's patch workflow for any changes to dependencies and `.patch` files.
+
+```bash
+# 1) Prepare a safe, unlinked copy in node_modules
+bun patch <pkg>
+
+# 2) Edit the package in node_modules and validate locally
+
+# 3) Commit the patch file and metadata
+bun patch --commit <pkg>
+```
+
+- Always run `bun patch <pkg>` before editing `node_modules` to avoid touching
+  Bun's global cache.
+- `bun patch --commit <pkg>` writes a patch into `patches/`, updates
+  `package.json` (`patchedDependencies`), and updates the lockfile.
+- Prefer `bun patch --commit <pkg>@<version>` when multiple versions are
+  installed.
+- Keep `.patch` files in `patches/` unless a different directory is explicitly
+  required.
+
 ## Effect Essentials
 
 ```typescript
