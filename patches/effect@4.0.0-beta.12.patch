@@ -1,17 +1,23 @@
-diff --git a/node_modules/.bun/effect@4.0.0-beta.12/node_modules/effect/.bun-tag-48f2c3cd6c718ed1 b/.bun-tag-48f2c3cd6c718ed1
+diff --git a/node_modules/server-mcp/node_modules/effect/.bun-tag-3bef8faaa24487a8 b/.bun-tag-3bef8faaa24487a8
 new file mode 100644
 index 0000000000000000000000000000000000000000..e69de29bb2d1d6434b8b29ae775ad8c2e48c5391
-diff --git a/node_modules/.bun/effect@4.0.0-beta.12/node_modules/effect/.bun-tag-591b0532eb504cd4 b/.bun-tag-591b0532eb504cd4
+diff --git a/node_modules/server-mcp/node_modules/effect/.bun-tag-3e75abd7de68446a b/.bun-tag-3e75abd7de68446a
 new file mode 100644
 index 0000000000000000000000000000000000000000..e69de29bb2d1d6434b8b29ae775ad8c2e48c5391
-diff --git a/node_modules/.bun/effect@4.0.0-beta.12/node_modules/effect/.bun-tag-b7e4f95e14abf783 b/.bun-tag-b7e4f95e14abf783
+diff --git a/node_modules/server-mcp/node_modules/effect/.bun-tag-48f2c3cd6c718ed1 b/.bun-tag-48f2c3cd6c718ed1
 new file mode 100644
 index 0000000000000000000000000000000000000000..e69de29bb2d1d6434b8b29ae775ad8c2e48c5391
-diff --git a/node_modules/.bun/effect@4.0.0-beta.12/node_modules/effect/.bun-tag-ee56d2e4f581cc3c b/.bun-tag-ee56d2e4f581cc3c
+diff --git a/node_modules/server-mcp/node_modules/effect/.bun-tag-591b0532eb504cd4 b/.bun-tag-591b0532eb504cd4
+new file mode 100644
+index 0000000000000000000000000000000000000000..e69de29bb2d1d6434b8b29ae775ad8c2e48c5391
+diff --git a/node_modules/server-mcp/node_modules/effect/.bun-tag-b7e4f95e14abf783 b/.bun-tag-b7e4f95e14abf783
+new file mode 100644
+index 0000000000000000000000000000000000000000..e69de29bb2d1d6434b8b29ae775ad8c2e48c5391
+diff --git a/node_modules/server-mcp/node_modules/effect/.bun-tag-ee56d2e4f581cc3c b/.bun-tag-ee56d2e4f581cc3c
 new file mode 100644
 index 0000000000000000000000000000000000000000..e69de29bb2d1d6434b8b29ae775ad8c2e48c5391
 diff --git a/dist/unstable/ai/McpSchema.js b/dist/unstable/ai/McpSchema.js
-index a9b2dfd82aba5cb0e8925cb9db8c8587724e0520..fd294e33a31283cff27106747502003c48c68067 100644
+index a9b2dfd82aba5cb0e8925cb9db8c8587724e0520..6358ec39724584f624e97a6d6a01145e0afe2423 100644
 --- a/dist/unstable/ai/McpSchema.js
 +++ b/dist/unstable/ai/McpSchema.js
 @@ -539,7 +539,7 @@ export class Resource extends /*#__PURE__*/Schema.Class("@effect/ai/McpSchema/Re
@@ -50,8 +56,22 @@ index a9b2dfd82aba5cb0e8925cb9db8c8587724e0520..fd294e33a31283cff27106747502003c
  }) {}
  /**
   * The server's response to a tools/list request from the client.
+diff --git a/dist/unstable/ai/McpServer.d.ts b/dist/unstable/ai/McpServer.d.ts
+index 79ee560449295f4914e93807c34e14314776f86b..bcb9b813c7b20bd5a4f75982203ffb21b55f462a 100644
+--- a/dist/unstable/ai/McpServer.d.ts
++++ b/dist/unstable/ai/McpServer.d.ts
+@@ -171,6 +171,9 @@ export declare const layerHttp: (options: {
+     readonly name: string;
+     readonly version: string;
+     readonly path: HttpRouter.PathInput;
++    readonly capabilities?: {
++        readonly extensions?: Readonly<Record<`${string}/${string}`, {}>>;
++    };
+ }) => Layer.Layer<McpServer | McpServerClient, never, HttpRouter.HttpRouter>;
+ /**
+  * Register a `Toolkit` with the `McpServer`.
 diff --git a/dist/unstable/ai/McpServer.js b/dist/unstable/ai/McpServer.js
-index 3d2aaa7c3a2711d553fd84ecf54c5513da8a7641..d7a64f8a249e7a03348c108b6329bb9e0deed2dd 100644
+index 3d2aaa7c3a2711d553fd84ecf54c5513da8a7641..f3e0d61b1f7da794fd32facfd7e6099e9a6f01b8 100644
 --- a/dist/unstable/ai/McpServer.js
 +++ b/dist/unstable/ai/McpServer.js
 @@ -360,7 +360,7 @@ export const registerToolkit = /*#__PURE__*/Effect.fnUntraced(function* (toolkit
@@ -63,7 +83,48 @@ index 3d2aaa7c3a2711d553fd84ecf54c5513da8a7641..d7a64f8a249e7a03348c108b6329bb9e
      const mcpTool = new McpTool({
        name: tool.name,
        description: Tool.getDescription(tool),
-@@ -717,9 +717,9 @@ const layerHandlers = serverInfo => ClientRpcs.toLayer(Effect.gen(function* () {
+@@ -640,7 +640,7 @@ const compileUriTemplate = (segments, ...schemas) => {
+     params
+   };
+ };
+-const layerHandlers = serverInfo => ClientRpcs.toLayer(Effect.gen(function* () {
++const layerHandlers = options => ClientRpcs.toLayer(Effect.gen(function* () {
+   const server = yield* McpServer;
+   let currentLogLevel = yield* CurrentLogLevel;
+   return ClientRpcs.of({
+@@ -653,6 +653,9 @@ const layerHandlers = serverInfo => ClientRpcs.toLayer(Effect.gen(function* () {
+       const capabilities = {
+         completions: {}
+       };
++      if (options.capabilities?.extensions) {
++        capabilities.extensions = { ...options.capabilities.extensions };
++      }
+       if (server.tools.length > 0) {
+         capabilities.tools = {
+           listChanged: true
+@@ -670,11 +673,18 @@ const layerHandlers = serverInfo => ClientRpcs.toLayer(Effect.gen(function* () {
+         };
+       }
+       server.initializedClients.add(clientId);
+-      return Effect.succeed({
++      const response = {
+         capabilities,
+-        serverInfo,
++        serverInfo: {
++          name: options.name,
++          version: options.version
++        },
+         protocolVersion: SUPPORTED_PROTOCOL_VERSIONS.includes(requestedVersion) ? requestedVersion : LATEST_PROTOCOL_VERSION
+-      });
++      };
++      return Effect.logInfo(`MCP initialize capabilities: ${JSON.stringify({
++        client: params.capabilities,
++        server: capabilities
++      })}`).pipe(Effect.as(response));
+     },
+     "completion/complete": r => server.completion(r).pipe(Effect.provideService(CurrentLogLevel, currentLogLevel)),
+     "logging/setLevel": ({
+@@ -717,9 +727,9 @@ const layerHandlers = serverInfo => ClientRpcs.toLayer(Effect.gen(function* () {
        resourceTemplates: server.resourceTemplates
      })),
      "tools/call": r => server.callTool(r).pipe(Effect.provideService(CurrentLogLevel, currentLogLevel)),
@@ -76,3 +137,67 @@ index 3d2aaa7c3a2711d553fd84ecf54c5513da8a7641..d7a64f8a249e7a03348c108b6329bb9e
      // Notifications
      "notifications/cancelled": _ => Effect.void,
      "notifications/initialized": _ => Effect.void,
+diff --git a/src/unstable/ai/McpServer.ts b/src/unstable/ai/McpServer.ts
+index 10cef7f05dccebc2c4aefaff485e88ad190d319f..d90a5a8a7d6433f8642eea41dea7fa96f9893218 100644
+--- a/src/unstable/ai/McpServer.ts
++++ b/src/unstable/ai/McpServer.ts
+@@ -520,6 +520,9 @@ export const layerHttp = (options: {
+   readonly name: string
+   readonly version: string
+   readonly path: HttpRouter.PathInput
++  readonly capabilities?: {
++    readonly extensions?: Readonly<Record<`${string}/${string}`, {}>>
++  }
+ }): Layer.Layer<McpServer | McpServerClient, never, HttpRouter.HttpRouter> =>
+   layer(options).pipe(
+     Layer.provide(RpcServer.layerProtocolHttp(options)),
+@@ -1071,9 +1074,12 @@ const compileUriTemplate = (segments: TemplateStringsArray, ...schemas: Readonly
+   } as const
+ }
+ 
+-const layerHandlers = (serverInfo: {
++const layerHandlers = (options: {
+   readonly name: string
+   readonly version: string
++  readonly capabilities?: {
++    readonly extensions?: Readonly<Record<`${string}/${string}`, {}>>
++  }
+ }) =>
+   ClientRpcs.toLayer(
+     Effect.gen(function*() {
+@@ -1088,6 +1094,9 @@ const layerHandlers = (serverInfo: {
+           const capabilities: Types.DeepMutable<typeof ServerCapabilities.Type> = {
+             completions: {}
+           }
++          if (options.capabilities?.extensions) {
++            capabilities.extensions = { ...options.capabilities.extensions }
++          }
+           if (server.tools.length > 0) {
+             capabilities.tools = { listChanged: true }
+           }
+@@ -1101,13 +1110,22 @@ const layerHandlers = (serverInfo: {
+             capabilities.prompts = { listChanged: true }
+           }
+           server.initializedClients.add(clientId)
+-          return Effect.succeed({
++          const response = {
+             capabilities,
+-            serverInfo,
++            serverInfo: {
++              name: options.name,
++              version: options.version
++            },
+             protocolVersion: SUPPORTED_PROTOCOL_VERSIONS.includes(requestedVersion)
+               ? requestedVersion
+               : LATEST_PROTOCOL_VERSION
+-          })
++          }
++          return Effect.logInfo(
++            `MCP initialize capabilities: ${JSON.stringify({
++              client: params.capabilities,
++              server: capabilities
++            })}`
++          ).pipe(Effect.as(response))
+         },
+         "completion/complete": (r) =>
+           server.completion(r).pipe(

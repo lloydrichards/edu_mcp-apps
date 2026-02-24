@@ -331,6 +331,11 @@ const McpRouter = McpServer.layerHttp({
   name: "BEVR MCP Server",
   version: "0.1.0",
   path: "/mcp",
+  capabilities: {
+    extensions: {
+      "io.modelcontextprotocol/ui": {},
+    },
+  },
 }).pipe(
   Layer.provideMerge(McpLive),
   Layer.provide(
