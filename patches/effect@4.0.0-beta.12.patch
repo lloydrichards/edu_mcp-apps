@@ -16,10 +16,59 @@ index 0000000000000000000000000000000000000000..e69de29bb2d1d6434b8b29ae775ad8c2
 diff --git a/node_modules/server-mcp/node_modules/effect/.bun-tag-ee56d2e4f581cc3c b/.bun-tag-ee56d2e4f581cc3c
 new file mode 100644
 index 0000000000000000000000000000000000000000..e69de29bb2d1d6434b8b29ae775ad8c2e48c5391
+diff --git a/dist/unstable/ai/McpSchema.d.ts b/dist/unstable/ai/McpSchema.d.ts
+index a18779cd88c34926ac4287ce54a88ea25d9a6eab..64a9daa68fdcd8ce714faf6e9081a745e7c58b57 100644
+--- a/dist/unstable/ai/McpSchema.d.ts
++++ b/dist/unstable/ai/McpSchema.d.ts
+@@ -321,7 +321,7 @@ declare const ClientCapabilities_base: Schema.ExtendableClass<ClientCapabilities
+      * Optional extensions capabilities advertised by the client.
+      * Keys are extension identifiers following <vendor-prefix>/<extension-name> (e.g. "io.modelcontextprotocol/ui").
+      */
+-    readonly extensions: Schema.decodeTo<Schema.optional<Schema.$Record<Schema.TemplateLiteral<readonly [Schema.String, "/", Schema.String]>, Schema.Unknown>>, Schema.optionalKey<Schema.$Record<Schema.TemplateLiteral<readonly [Schema.String, "/", Schema.String]>, Schema.Unknown>>, never, never>;
++    readonly extensions: Schema.decodeTo<Schema.optional<Schema.$Record<Schema.TemplateLiteral<readonly [Schema.String, "/", Schema.String]>, Schema.Any>>, Schema.optionalKey<Schema.$Record<Schema.TemplateLiteral<readonly [Schema.String, "/", Schema.String]>, Schema.Any>>, never, never>;
+     /**
+      * Present if the client supports listing roots.
+      */
+@@ -364,7 +364,7 @@ declare const ServerCapabilities_base: Schema.Opaque<ServerCapabilities, Schema.
+      * Optional extensions capabilities advertised by the server.
+      * Keys are extension identifiers following <vendor-prefix>/<extension-name> (e.g. "io.modelcontextprotocol/ui").
+      */
+-    readonly extensions: Schema.decodeTo<Schema.optional<Schema.$Record<Schema.TemplateLiteral<readonly [Schema.String, "/", Schema.String]>, Schema.Unknown>>, Schema.optionalKey<Schema.$Record<Schema.TemplateLiteral<readonly [Schema.String, "/", Schema.String]>, Schema.Unknown>>, never, never>;
++    readonly extensions: Schema.decodeTo<Schema.optional<Schema.$Record<Schema.TemplateLiteral<readonly [Schema.String, "/", Schema.String]>, Schema.Any>>, Schema.optionalKey<Schema.$Record<Schema.TemplateLiteral<readonly [Schema.String, "/", Schema.String]>, Schema.Any>>, never, never>;
+     /**
+      * Present if the server supports sending log messages to the client.
+      */
+@@ -432,7 +432,7 @@ declare const ServerCapabilities_base: Schema.Opaque<ServerCapabilities, Schema.
+      * Optional extensions capabilities advertised by the server.
+      * Keys are extension identifiers following <vendor-prefix>/<extension-name> (e.g. "io.modelcontextprotocol/ui").
+      */
+-    readonly extensions: Schema.decodeTo<Schema.optional<Schema.$Record<Schema.TemplateLiteral<readonly [Schema.String, "/", Schema.String]>, Schema.Unknown>>, Schema.optionalKey<Schema.$Record<Schema.TemplateLiteral<readonly [Schema.String, "/", Schema.String]>, Schema.Unknown>>, never, never>;
++    readonly extensions: Schema.decodeTo<Schema.optional<Schema.$Record<Schema.TemplateLiteral<readonly [Schema.String, "/", Schema.String]>, Schema.Any>>, Schema.optionalKey<Schema.$Record<Schema.TemplateLiteral<readonly [Schema.String, "/", Schema.String]>, Schema.Any>>, never, never>;
+     /**
+      * Present if the server supports sending log messages to the client.
+      */
 diff --git a/dist/unstable/ai/McpSchema.js b/dist/unstable/ai/McpSchema.js
-index a9b2dfd82aba5cb0e8925cb9db8c8587724e0520..6358ec39724584f624e97a6d6a01145e0afe2423 100644
+index a9b2dfd82aba5cb0e8925cb9db8c8587724e0520..951fc7d3db830f5105ad7c6f215baded38ff6e93 100644
 --- a/dist/unstable/ai/McpSchema.js
 +++ b/dist/unstable/ai/McpSchema.js
+@@ -169,7 +169,7 @@ export class ClientCapabilities extends /*#__PURE__*/Schema.Class("@effect/ai/Mc
+    * Optional extensions capabilities advertised by the client.
+    * Keys are extension identifiers following <vendor-prefix>/<extension-name> (e.g. "io.modelcontextprotocol/ui").
+    */
+-  extensions: /*#__PURE__*/optional(/*#__PURE__*/Schema.Record(/*#__PURE__*/Schema.TemplateLiteral([Schema.String, "/", Schema.String]), Schema.Unknown)),
++  extensions: /*#__PURE__*/optional(/*#__PURE__*/Schema.Record(/*#__PURE__*/Schema.TemplateLiteral([Schema.String, "/", Schema.String]), Schema.Any)),
+   /**
+    * Present if the client supports listing roots.
+    */
+@@ -205,7 +205,7 @@ export class ServerCapabilities extends /*#__PURE__*/Schema.Opaque()(/*#__PURE__
+    * Optional extensions capabilities advertised by the server.
+    * Keys are extension identifiers following <vendor-prefix>/<extension-name> (e.g. "io.modelcontextprotocol/ui").
+    */
+-  extensions: /*#__PURE__*/optional(/*#__PURE__*/Schema.Record(/*#__PURE__*/Schema.TemplateLiteral([Schema.String, "/", Schema.String]), Schema.Unknown)),
++  extensions: /*#__PURE__*/optional(/*#__PURE__*/Schema.Record(/*#__PURE__*/Schema.TemplateLiteral([Schema.String, "/", Schema.String]), Schema.Any)),
+   /**
+    * Present if the server supports sending log messages to the client.
+    */
 @@ -539,7 +539,7 @@ export class Resource extends /*#__PURE__*/Schema.Class("@effect/ai/McpSchema/Re
     * This parameter name is reserved by MCP to allow clients and servers to
     * attach additional metadata to resources.
@@ -137,6 +186,28 @@ index 3d2aaa7c3a2711d553fd84ecf54c5513da8a7641..f3e0d61b1f7da794fd32facfd7e6099e
      // Notifications
      "notifications/cancelled": _ => Effect.void,
      "notifications/initialized": _ => Effect.void,
+diff --git a/src/unstable/ai/McpSchema.ts b/src/unstable/ai/McpSchema.ts
+index 7888fff9cf8af7e515df873d7fce2a21e0f471a3..780228466031845699b543b87415c36aa213d944 100644
+--- a/src/unstable/ai/McpSchema.ts
++++ b/src/unstable/ai/McpSchema.ts
+@@ -244,7 +244,7 @@ export class ClientCapabilities extends Schema.Class<ClientCapabilities>(
+    * Optional extensions capabilities advertised by the client.
+    * Keys are extension identifiers following <vendor-prefix>/<extension-name> (e.g. "io.modelcontextprotocol/ui").
+    */
+-  extensions: optional(Schema.Record(Schema.TemplateLiteral([Schema.String, "/", Schema.String]), Schema.Unknown)),
++  extensions: optional(Schema.Record(Schema.TemplateLiteral([Schema.String, "/", Schema.String]), Schema.Any)),
+   /**
+    * Present if the client supports listing roots.
+    */
+@@ -281,7 +281,7 @@ export class ServerCapabilities extends Schema.Opaque<ServerCapabilities>()(Sche
+    * Optional extensions capabilities advertised by the server.
+    * Keys are extension identifiers following <vendor-prefix>/<extension-name> (e.g. "io.modelcontextprotocol/ui").
+    */
+-  extensions: optional(Schema.Record(Schema.TemplateLiteral([Schema.String, "/", Schema.String]), Schema.Unknown)),
++  extensions: optional(Schema.Record(Schema.TemplateLiteral([Schema.String, "/", Schema.String]), Schema.Any)),
+   /**
+    * Present if the server supports sending log messages to the client.
+    */
 diff --git a/src/unstable/ai/McpServer.ts b/src/unstable/ai/McpServer.ts
 index 10cef7f05dccebc2c4aefaff485e88ad190d319f..d90a5a8a7d6433f8642eea41dea7fa96f9893218 100644
 --- a/src/unstable/ai/McpServer.ts
