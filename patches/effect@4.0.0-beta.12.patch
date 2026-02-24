@@ -1,0 +1,78 @@
+diff --git a/node_modules/.bun/effect@4.0.0-beta.12/node_modules/effect/.bun-tag-48f2c3cd6c718ed1 b/.bun-tag-48f2c3cd6c718ed1
+new file mode 100644
+index 0000000000000000000000000000000000000000..e69de29bb2d1d6434b8b29ae775ad8c2e48c5391
+diff --git a/node_modules/.bun/effect@4.0.0-beta.12/node_modules/effect/.bun-tag-591b0532eb504cd4 b/.bun-tag-591b0532eb504cd4
+new file mode 100644
+index 0000000000000000000000000000000000000000..e69de29bb2d1d6434b8b29ae775ad8c2e48c5391
+diff --git a/node_modules/.bun/effect@4.0.0-beta.12/node_modules/effect/.bun-tag-b7e4f95e14abf783 b/.bun-tag-b7e4f95e14abf783
+new file mode 100644
+index 0000000000000000000000000000000000000000..e69de29bb2d1d6434b8b29ae775ad8c2e48c5391
+diff --git a/node_modules/.bun/effect@4.0.0-beta.12/node_modules/effect/.bun-tag-ee56d2e4f581cc3c b/.bun-tag-ee56d2e4f581cc3c
+new file mode 100644
+index 0000000000000000000000000000000000000000..e69de29bb2d1d6434b8b29ae775ad8c2e48c5391
+diff --git a/dist/unstable/ai/McpSchema.js b/dist/unstable/ai/McpSchema.js
+index a9b2dfd82aba5cb0e8925cb9db8c8587724e0520..fd294e33a31283cff27106747502003c48c68067 100644
+--- a/dist/unstable/ai/McpSchema.js
++++ b/dist/unstable/ai/McpSchema.js
+@@ -539,7 +539,7 @@ export class Resource extends /*#__PURE__*/Schema.Class("@effect/ai/McpSchema/Re
+    * This parameter name is reserved by MCP to allow clients and servers to
+    * attach additional metadata to resources.
+    */
+-  _meta: /*#__PURE__*/optional(/*#__PURE__*/Schema.Record(Schema.String, Schema.Unknown))
++  _meta: /*#__PURE__*/optional(/*#__PURE__*/Schema.Record(Schema.String, Schema.Any))
+ }) {}
+ /**
+  * A template description for resources available on the server.
+@@ -579,7 +579,7 @@ export class ResourceTemplate extends /*#__PURE__*/Schema.Class("@effect/ai/McpS
+   /**
+    * Optional additional metadata for the client.
+    */
+-  _meta: /*#__PURE__*/optional(/*#__PURE__*/Schema.Record(Schema.String, Schema.Unknown))
++  _meta: /*#__PURE__*/optional(/*#__PURE__*/Schema.Record(Schema.String, Schema.Any))
+ }) {}
+ /**
+  * The contents of a specific resource or sub-resource.
+@@ -599,7 +599,7 @@ export class ResourceContents extends /*#__PURE__*/Schema.Opaque()(/*#__PURE__*/
+   /**
+    * Optional additional metadata for the client.
+    */
+-  _meta: /*#__PURE__*/optional(/*#__PURE__*/Schema.Record(Schema.String, Schema.Unknown))
++  _meta: /*#__PURE__*/optional(/*#__PURE__*/Schema.Record(Schema.String, Schema.Any))
+ })) {}
+ /**
+  * The contents of a text resource, which can be represented as a string.
+@@ -1068,7 +1068,7 @@ export class Tool extends /*#__PURE__*/Schema.Class("@effect/ai/McpSchema/Tool")
+    * This parameter name is reserved by MCP to allow clients and servers to
+    * attach additional metadata to resources.
+    */
+-  _meta: /*#__PURE__*/optional(/*#__PURE__*/Schema.Record(Schema.String, Schema.Unknown))
++  _meta: /*#__PURE__*/optional(/*#__PURE__*/Schema.Record(Schema.String, Schema.Any))
+ }) {}
+ /**
+  * The server's response to a tools/list request from the client.
+diff --git a/dist/unstable/ai/McpServer.js b/dist/unstable/ai/McpServer.js
+index 3d2aaa7c3a2711d553fd84ecf54c5513da8a7641..d7a64f8a249e7a03348c108b6329bb9e0deed2dd 100644
+--- a/dist/unstable/ai/McpServer.js
++++ b/dist/unstable/ai/McpServer.js
+@@ -360,7 +360,7 @@ export const registerToolkit = /*#__PURE__*/Effect.fnUntraced(function* (toolkit
+   const built = yield* toolkit;
+   const services = yield* Effect.services();
+   for (const tool of Object.values(built.tools)) {
+-    const toolMeta = ServiceMap.getOrUndefined(tool.annotations, Tool.Meta);
++    const toolMeta = ServiceMap.getOption(tool.annotations, Tool.Meta).pipe(Option.getOrUndefined);
+     const mcpTool = new McpTool({
+       name: tool.name,
+       description: Tool.getDescription(tool),
+@@ -717,9 +717,9 @@ const layerHandlers = serverInfo => ClientRpcs.toLayer(Effect.gen(function* () {
+       resourceTemplates: server.resourceTemplates
+     })),
+     "tools/call": r => server.callTool(r).pipe(Effect.provideService(CurrentLogLevel, currentLogLevel)),
+-    "tools/list": () => Effect.sync(() => new ListToolsResult({
+-      tools: server.tools
+-    })),
++        "tools/list": () => Effect.sync(() => new ListToolsResult({
++          tools: server.tools
++        })),
+     // Notifications
+     "notifications/cancelled": _ => Effect.void,
+     "notifications/initialized": _ => Effect.void,
