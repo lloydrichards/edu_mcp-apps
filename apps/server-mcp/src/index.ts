@@ -201,7 +201,7 @@ const BarChartPayload = Schema.Struct({
   props: Schema.optional(BarChartProps),
 });
 
-const GetTimeTool = Tool.make("GetTime", {
+const GetTimeTool = Tool.make("get_time", {
   description: "Returns the current server time",
   parameters: Schema.Struct({}),
   success: Schema.String,
@@ -214,7 +214,7 @@ const GetTimeTool = Tool.make("GetTime", {
     },
   });
 
-const PollingDashboardTool = Tool.make("PollingDashboard", {
+const PollingDashboardTool = Tool.make("render_dashboard", {
   description: "Render the polling dashboard UI",
   parameters: Schema.Struct({}),
   success: Schema.String,
@@ -227,7 +227,7 @@ const PollingDashboardTool = Tool.make("PollingDashboard", {
     },
   });
 
-const PomodoroTimerTool = Tool.make("PomodoroTimer", {
+const PomodoroTimerTool = Tool.make("render_timer", {
   description: "Render the Pomodoro timer UI",
   parameters: Schema.Struct({}),
   success: Schema.String,
@@ -240,7 +240,7 @@ const PomodoroTimerTool = Tool.make("PomodoroTimer", {
     },
   });
 
-const RenderLineChartTool = Tool.make("RenderLineChart", {
+const RenderLineChartTool = Tool.make("render_line_chart", {
   description: "Render a line chart from data points",
   parameters: LineChartPayload,
   success: LineChartPayload,
@@ -253,7 +253,7 @@ const RenderLineChartTool = Tool.make("RenderLineChart", {
     },
   });
 
-const RenderBarChartTool = Tool.make("RenderBarChart", {
+const RenderBarChartTool = Tool.make("render_bar_chart", {
   description: "Render a categorical bar chart",
   parameters: BarChartPayload,
   success: BarChartPayload,
@@ -266,7 +266,7 @@ const RenderBarChartTool = Tool.make("RenderBarChart", {
     },
   });
 
-const PollDashboardStatsTool = Tool.make("PollDashboardStats", {
+const PollDashboardStatsTool = Tool.make("get_dashboard_stats", {
   description: "Returns latest dashboard stats for the polling UI",
   parameters: Schema.Struct({}),
   success: DashboardStats,
@@ -289,10 +289,10 @@ const UiToolkit = Toolkit.make(
 const UiToolLayer = McpServer.toolkit(UiToolkit).pipe(
   Layer.provide(
     UiToolkit.toLayer({
-      GetTime: () => Effect.sync(() => new Date().toISOString()),
-      PollingDashboard: () =>
-        Effect.succeed("Polling dashboard ready. Use PollDashboardStats."),
-      PollDashboardStats: () =>
+      get_time: () => Effect.sync(() => new Date().toISOString()),
+      render_dashboard: () =>
+        Effect.succeed("Polling dashboard ready. Use dashboard/stats."),
+      get_dashboard_stats: () =>
         Effect.gen(function* () {
           const timestamp = yield* Effect.sync(() => new Date().toISOString());
           const cpu = yield* Effect.sync(() =>
@@ -307,10 +307,10 @@ const UiToolLayer = McpServer.toolkit(UiToolkit).pipe(
           const status = cpu > 75 ? "busy" : cpu < 35 ? "idle" : "ok";
           return { timestamp, cpu, memory, requests, status };
         }),
-      PomodoroTimer: () =>
+      render_timer: () =>
         Effect.succeed("Pomodoro timer ready. Use the UI to start."),
-      RenderLineChart: (payload) => Effect.succeed(payload),
-      RenderBarChart: (payload) => Effect.succeed(payload),
+      render_line_chart: (payload) => Effect.succeed(payload),
+      render_bar_chart: (payload) => Effect.succeed(payload),
     }),
   ),
 );
