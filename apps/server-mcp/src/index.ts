@@ -49,14 +49,6 @@ const uiContent = (
 // Define Resources
 const ResourceLayer = Layer.mergeAll(
   McpServer.resource({
-    uri: "app://primer",
-    name: "Primer Document",
-    description: "Documentation for the application",
-    content: Effect.succeed(
-      "This is a sample primer document to demonstrate MCP server capabilities.",
-    ),
-  }),
-  McpServer.resource({
     uri: GetTimeUiResourceUri,
     name: "Get Time",
     description: "Get Time example UI",
@@ -108,47 +100,6 @@ const ResourceLayer = Layer.mergeAll(
       },
     }),
   }),
-);
-
-// Define Prompts
-const PromptLayer = Layer.mergeAll(
-  McpServer.prompt({
-    name: "Hello Prompt",
-    description: "A simple greeting prompt",
-    parameters: {
-      name: Schema.String,
-    },
-    content: ({ name }) =>
-      Effect.succeed(
-        `Hello, ${name}! Welcome to the MCP server demonstration.`,
-      ),
-  }),
-  // You can add more prompts here
-);
-
-// Define Toolkit
-class AiTools extends Toolkit.make(
-  Tool.make("GetDadJoke", {
-    description: "Get a hilarious dad joke from the ICanHazDadJoke API",
-    success: Schema.String,
-    failure: Schema.Never,
-    parameters: Schema.Struct({
-      searchTerm: Schema.String.annotate({
-        description: "The search term to use to find dad jokes",
-      }),
-    }),
-  }),
-) {}
-
-const ToolLayer = McpServer.toolkit(AiTools).pipe(
-  Layer.provide(
-    AiTools.toLayer({
-      GetDadJoke: ({ searchTerm }, _context) =>
-        Effect.succeed(
-          `Here's a dad joke about ${searchTerm}: Why don't ${searchTerm}s ever get lost? Because they always follow the map!`,
-        ),
-    }),
-  ),
 );
 
 const DashboardStats = Schema.Struct({
@@ -316,20 +267,15 @@ const UiToolLayer = McpServer.toolkit(UiToolkit).pipe(
 );
 
 // Define Live API
-const McpLive = Layer.mergeAll(
-  ResourceLayer,
-  PromptLayer,
-  ToolLayer,
-  UiToolLayer,
-);
+const McpLive = Layer.mergeAll(ResourceLayer, UiToolLayer);
 
 const ServerConfig = Config.all({
   port: Config.number("MCP_PORT").pipe(Config.withDefault(() => 9009)),
 });
 
 const McpRouter = McpServer.layerHttp({
-  name: "BEVR MCP Server",
-  version: "0.1.0",
+  name: "Edu MCP App Server",
+  version: "0.2.0",
   path: "/mcp",
 }).pipe(
   Layer.provideMerge(McpLive),
