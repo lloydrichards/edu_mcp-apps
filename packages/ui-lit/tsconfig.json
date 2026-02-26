@@ -1,0 +1,10 @@
+{
+  "extends": "@repo/config-typescript/vite.json",
+  "compilerOptions": {
+    "rootDir": ".",
+    "outDir": "dist",
+    "declaration": true,
+    "declarationMap": true
+  },
+  "include": ["lib"]
+}
