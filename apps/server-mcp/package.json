@@ -4,7 +4,7 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "build": "bun build src/index.ts --outdir=dist --target=bun --minify",
+    "build": "bun build src/index.ts --outdir=dist --target=bun --minify --external:msgpackr --external:msgpackr-extract",
     "build:types": "tsc --emitDeclarationOnly",
     "dev": "bun --watch run src/index.ts",
     "inspector": "bun run dev & sleep 2 && npx @mcpjam/inspector@latest; kill %1",
@@ -13,7 +13,7 @@
     "clean": "git clean -xdf .cache .turbo dist node_modules"
   },
   "dependencies": {
-    "@effect/platform-bun": "^4.0.0-beta.13",
+    "@effect/platform-bun": "4.0.0-beta.13",
     "@repo/domain": "workspace:*",
     "@repo/lit-lab": "workspace:*",
     "effect": "4.0.0-beta.13"

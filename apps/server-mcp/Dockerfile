@@ -31,7 +31,6 @@ USER server-mcp
 
 COPY --from=builder /app/apps/server-mcp/dist/index.js ./server-mcp/index.js
 COPY --from=builder /app/apps/server-mcp/package.json ./server-mcp/package.json
-COPY --from=builder /app/apps/server-mcp/src/ui ./server-mcp/ui
 
 EXPOSE 8000
 
