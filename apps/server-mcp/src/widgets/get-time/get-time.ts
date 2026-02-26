@@ -9,12 +9,16 @@ export const GetTimeResourceLayer = McpServer.resource({
   name: "Get Time",
   description: "Get Time example UI",
   mimeType: UiResourceMimeType,
-  content: uiContent(GetTimeUiResourceUri, "get-time/index.html", {
-    prefersBorder: true,
-    csp: {
-      resourceDomains: ["https://cdn.jsdelivr.net"],
+  content: uiContent(
+    GetTimeUiResourceUri,
+    import.meta.resolve("@repo/lit-lab/get_timer.html"),
+    {
+      prefersBorder: true,
+      csp: {
+        resourceDomains: ["https://cdn.jsdelivr.net"],
+      },
     },
-  }),
+  ),
 });
 
 export const GetTimeTool = Tool.make("get_time", {
