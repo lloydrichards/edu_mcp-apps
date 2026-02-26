@@ -171,7 +171,8 @@
       }
 
       function safeDate(value) {
-        if (value instanceof Date && !Number.isNaN(value.getTime())) return value;
+        if (value instanceof Date && !Number.isNaN(value.getTime()))
+          return value;
         if (typeof value === "number" && Number.isFinite(value)) {
           const date = new Date(value);
           return Number.isNaN(date.getTime()) ? null : date;
@@ -202,7 +203,6 @@
           props: payload.props || {},
         };
       }
-
 
       function prepareState(data) {
         state.data = data;
@@ -344,9 +344,10 @@
             .call(colorLegend);
         }
 
-        chartLayer.selectGroup("highlight").datum(state.selection).call(
-          highlightLayer,
-        );
+        chartLayer
+          .selectGroup("highlight")
+          .datum(state.selection)
+          .call(highlightLayer);
 
         const interactionLayer = sszvis
           .move()
@@ -371,9 +372,7 @@
           }
         },
         changeDate(_event, inputDate) {
-          const closestDate = xAcc(
-            closestDatum(state.data, xAcc, inputDate),
-          );
+          const closestDate = xAcc(closestDatum(state.data, xAcc, inputDate));
           const closestData = state.lineData.map((linePoints) =>
             sszvis.find(
               (d) => xAcc(d).toString() === closestDate.toString(),
@@ -422,7 +421,10 @@
 
       function isSelected(currentState) {
         return (d) =>
-          sszvis.contains(currentState.selection.map(xAcc).map(String), String(d));
+          sszvis.contains(
+            currentState.selection.map(xAcc).map(String),
+            String(d),
+          );
       }
 
       window.addEventListener("message", (event) => {
