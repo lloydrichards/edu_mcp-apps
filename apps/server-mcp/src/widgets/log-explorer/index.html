@@ -1,0 +1,298 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Log Explorer</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        font-family: var(--font-sans, "IBM Plex Sans", system-ui, sans-serif);
+        background: var(--color-background-primary, #0c0f14);
+        color: var(--color-text-primary, #eef2f6);
+      }
+      .wrap {
+        padding: 14px;
+      }
+      .card {
+        border-radius: 14px;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        background: linear-gradient(
+            180deg,
+            rgba(255, 255, 255, 0.04),
+            rgba(255, 255, 255, 0.01)
+          ),
+          rgba(10, 12, 16, 0.95);
+        padding: 14px;
+        display: grid;
+        gap: 12px;
+      }
+      header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+      }
+      h1 {
+        margin: 0;
+        font-size: 15px;
+        font-weight: 600;
+      }
+      .meta {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 11px;
+        color: rgba(255, 255, 255, 0.6);
+      }
+      .status {
+        padding: 3px 8px;
+        border-radius: 999px;
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        background: rgba(255, 255, 255, 0.05);
+      }
+      .actions {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .btn {
+        border-radius: 999px;
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        background: rgba(255, 255, 255, 0.06);
+        color: inherit;
+        font-size: 11px;
+        padding: 6px 10px;
+        cursor: pointer;
+      }
+      .btn[aria-pressed="true"] {
+        background: rgba(108, 226, 129, 0.18);
+        border-color: rgba(108, 226, 129, 0.5);
+        color: #d1ffe0;
+      }
+      .btn.secondary {
+        background: rgba(255, 255, 255, 0.03);
+      }
+      .stream {
+        border-radius: 12px;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        background: rgba(9, 10, 13, 0.9);
+        padding: 10px 12px;
+        height: 280px;
+        overflow: auto;
+        font-family: var(--font-mono, "IBM Plex Mono", ui-monospace, monospace);
+        font-size: 12px;
+      }
+      .line {
+        display: grid;
+        grid-template-columns: 70px 50px 1fr;
+        gap: 10px;
+        padding: 4px 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      }
+      .line:last-child {
+        border-bottom: none;
+      }
+      .time {
+        color: rgba(255, 255, 255, 0.45);
+      }
+      .level {
+        text-transform: uppercase;
+        font-size: 10px;
+        letter-spacing: 0.08em;
+        padding: 2px 6px;
+        border-radius: 999px;
+        text-align: center;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+      }
+      .level.debug {
+        color: #9bb9ff;
+        border-color: rgba(155, 185, 255, 0.4);
+      }
+      .level.info {
+        color: #9fe3ff;
+        border-color: rgba(159, 227, 255, 0.4);
+      }
+      .level.warn {
+        color: #ffd289;
+        border-color: rgba(255, 210, 137, 0.4);
+      }
+      .level.error {
+        color: #ff9aa4;
+        border-color: rgba(255, 154, 164, 0.4);
+      }
+      .empty {
+        color: rgba(255, 255, 255, 0.5);
+        font-size: 12px;
+        padding: 8px 0;
+      }
+      @media (max-width: 520px) {
+        .line {
+          grid-template-columns: 64px 44px 1fr;
+        }
+        .stream {
+          height: 240px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <div class="card">
+        <header>
+          <div>
+            <h1>Log Explorer</h1>
+            <div class="meta">
+              <span id="last">Waiting for stream…</span>
+              <span class="status" id="status">idle</span>
+            </div>
+          </div>
+          <div class="actions">
+            <button class="btn" id="pause" type="button" aria-pressed="false">
+              Pause
+            </button>
+            <button class="btn secondary" id="clear" type="button">
+              Clear
+            </button>
+          </div>
+        </header>
+        <div class="stream" id="stream"></div>
+      </div>
+    </div>
+    <script>
+      let nextId = 1;
+      let cursor = 0;
+      let intervalId = null;
+      let paused = false;
+      let reconnectDelay = 1000;
+      const streamEl = document.getElementById("stream");
+      const statusEl = document.getElementById("status");
+      const lastEl = document.getElementById("last");
+      const pauseBtn = document.getElementById("pause");
+      const clearBtn = document.getElementById("clear");
+
+      function sendRequest(method, params) {
+        const id = nextId++;
+        window.parent.postMessage({ jsonrpc: "2.0", id, method, params }, "*");
+        return new Promise((resolve, reject) => {
+          function listener(event) {
+            if (!event.data || event.data.id !== id) return;
+            window.removeEventListener("message", listener);
+            if (event.data.result) return resolve(event.data.result);
+            reject(event.data.error || new Error("Request failed"));
+          }
+          window.addEventListener("message", listener);
+        });
+      }
+
+      function sendNotification(method, params) {
+        window.parent.postMessage({ jsonrpc: "2.0", method, params }, "*");
+      }
+
+      function setStatus(value) {
+        statusEl.textContent = value;
+      }
+
+      function formatTime(value) {
+        return value.slice(11, 19);
+      }
+
+      function appendLine(entry) {
+        const row = document.createElement("div");
+        row.className = "line";
+        row.innerHTML = `
+          <span class="time">${formatTime(entry.timestamp)}</span>
+          <span class="level ${entry.level}">${entry.level}</span>
+          <span>${entry.message}</span>
+        `;
+        streamEl.appendChild(row);
+      }
+
+      function enforceBuffer(max) {
+        while (streamEl.children.length > max) {
+          streamEl.removeChild(streamEl.firstChild);
+        }
+      }
+
+      async function poll() {
+        try {
+          const result = await sendRequest("tools/call", {
+            name: "poll_log_entries",
+            arguments: { cursor },
+          });
+          const structured = result?.structuredContent;
+          if (structured?.entries) {
+            const entries = structured.entries;
+            cursor = structured.cursor ?? cursor;
+            if (entries.length > 0) {
+              entries.forEach(appendLine);
+              enforceBuffer(200);
+              if (!paused) {
+                streamEl.scrollTop = streamEl.scrollHeight;
+              }
+              lastEl.textContent = `Last: ${formatTime(
+                entries[entries.length - 1].timestamp,
+              )}`;
+              setStatus(paused ? "paused" : "live");
+            }
+          }
+          reconnectDelay = 1000;
+        } catch (_err) {
+          setStatus("reconnecting");
+          stopPolling();
+          setTimeout(startPolling, reconnectDelay);
+          reconnectDelay = Math.min(reconnectDelay + 1000, 3000);
+        }
+      }
+
+      function startPolling() {
+        if (intervalId !== null) return;
+        poll();
+        intervalId = window.setInterval(poll, 1200);
+      }
+
+      function stopPolling() {
+        if (intervalId === null) return;
+        clearInterval(intervalId);
+        intervalId = null;
+      }
+
+      pauseBtn.addEventListener("click", () => {
+        paused = !paused;
+        pauseBtn.setAttribute("aria-pressed", paused ? "true" : "false");
+        pauseBtn.textContent = paused ? "Resume" : "Pause";
+        setStatus(paused ? "paused" : "live");
+        if (paused) {
+          stopPolling();
+        } else {
+          startPolling();
+          streamEl.scrollTop = streamEl.scrollHeight;
+        }
+      });
+
+      clearBtn.addEventListener("click", () => {
+        streamEl.innerHTML = "<div class=\"empty\">Log cleared.</div>";
+      });
+
+      sendRequest("ui/initialize", {
+        appCapabilities: {},
+        appInfo: { name: "log-explorer", version: "0.1.0" },
+        protocolVersion: "2025-06-18",
+      }).then(() => {
+        sendNotification("ui/notifications/initialized", {});
+        streamEl.innerHTML = "<div class=\"empty\">Listening…</div>";
+        setStatus("live");
+        startPolling();
+      });
+    </script>
+  </body>
+</html>

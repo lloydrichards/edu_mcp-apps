@@ -18,6 +18,14 @@ import {
   renderLineChartHandler,
 } from "./widgets/line-chart/line-chart";
 import {
+  LogExplorerResourceLayer,
+  LogExplorerStateLayer,
+  LogExplorerTool,
+  PollLogEntriesTool,
+  pollLogEntriesHandler,
+  renderLogExplorerHandler,
+} from "./widgets/log-explorer/log-explorer";
+import {
   getDashboardStatsHandler,
   PollDashboardStatsTool,
   PollingDashboardResourceLayer,
@@ -37,6 +45,7 @@ const ResourceLayer = Layer.mergeAll(
   PomodoroTimerResourceLayer,
   LineChartResourceLayer,
   BarChartResourceLayer,
+  LogExplorerResourceLayer,
 );
 
 const UiToolkit = Toolkit.make(
@@ -46,6 +55,8 @@ const UiToolkit = Toolkit.make(
   PomodoroTimerTool,
   RenderLineChartTool,
   RenderBarChartTool,
+  LogExplorerTool,
+  PollLogEntriesTool,
 );
 
 const UiToolLayer = McpServer.toolkit(UiToolkit).pipe(
@@ -57,12 +68,18 @@ const UiToolLayer = McpServer.toolkit(UiToolkit).pipe(
       render_timer: renderTimerHandler,
       render_line_chart: renderLineChartHandler,
       render_bar_chart: renderBarChartHandler,
+      render_log_explorer: renderLogExplorerHandler,
+      poll_log_entries: pollLogEntriesHandler,
     }),
   ),
 );
 
 // Define Live API
-const McpLive = Layer.mergeAll(ResourceLayer, UiToolLayer);
+const McpLive = Layer.mergeAll(
+  ResourceLayer,
+  UiToolLayer,
+  LogExplorerStateLayer,
+);
 
 const ServerConfig = Config.all({
   port: Config.number("MCP_PORT").pipe(Config.withDefault(() => 9009)),
