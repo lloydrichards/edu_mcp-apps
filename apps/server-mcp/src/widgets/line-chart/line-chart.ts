@@ -18,11 +18,14 @@ export const LineChartResourceLayer = McpServer.resource({
   }),
 });
 
-const LineChartNumber = Schema.Union([Schema.Number, Schema.NumberFromString]);
-
 const LineChartPoint = Schema.Struct({
-  x: LineChartNumber,
-  y: LineChartNumber,
+  x: Schema.String.pipe(
+    Schema.annotate({
+      description:
+        "ISO 8601 date string for the x-axis (YYYY-MM-DD or full timestamp)",
+    }),
+  ),
+  y: Schema.NumberFromString,
   category: Schema.optional(Schema.String),
 });
 
@@ -30,10 +33,10 @@ const LineChartProps = Schema.Struct({
   title: Schema.optional(Schema.String),
   xLabel: Schema.optional(Schema.String),
   yLabel: Schema.optional(Schema.String),
-  ticks: Schema.optional(LineChartNumber),
+  ticks: Schema.optional(Schema.NumberFromString),
   stroke: Schema.optional(Schema.String),
-  width: Schema.optional(LineChartNumber),
-  height: Schema.optional(LineChartNumber),
+  width: Schema.optional(Schema.NumberFromString),
+  height: Schema.optional(Schema.NumberFromString),
   showPoints: Schema.optional(Schema.Boolean),
 });
 
