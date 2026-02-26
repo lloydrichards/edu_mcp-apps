@@ -4,89 +4,139 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Get Time</title>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.20.1/cdn/themes/light.css"
+    />
     <style>
       :root {
-        color-scheme: light dark;
+        color-scheme: light;
+        --ink: var(--sl-color-neutral-1000, #1b1b1b);
+        --ink-soft: var(--sl-color-neutral-600, #5b5b5b);
       }
       * {
         box-sizing: border-box;
       }
       body {
         margin: 0;
-        font-family: var(--font-sans, system-ui, sans-serif);
-        background: var(--color-background-primary, #fff);
-        color: var(--color-text-primary, #111);
+        font-family: var(--sl-font-sans);
+        background: transparent;
+        color: var(--ink);
       }
       .wrap {
-        padding: 16px;
+        padding: 12px 14px;
       }
-      .card {
-        background: var(--color-background-secondary, #f7f7f5);
-        border-radius: var(--border-radius-lg, 10px);
-        padding: 16px;
-        border: 1px solid var(--color-border-secondary, rgba(0, 0, 0, 0.1));
+      .header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
       }
       h1 {
-        margin: 0 0 6px;
-        font-size: 16px;
+        margin: 0;
+        font-size: 14px;
         font-weight: 600;
       }
       p {
         margin: 0;
-        font-size: 13px;
-        color: var(--color-text-secondary, #555);
+        font-size: 12px;
+        color: var(--ink-soft);
+      }
+      .grid {
+        margin-top: 10px;
+        display: grid;
+        gap: 8px;
       }
       .row {
         display: flex;
         align-items: center;
         justify-content: space-between;
-        margin-top: 12px;
-        gap: 12px;
+        gap: 10px;
+      }
+      .row small {
+        display: block;
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+        font-size: 10px;
+        color: var(--ink-soft);
       }
       .time {
-        font-size: 14px;
+        font-size: 16px;
         font-weight: 600;
-        font-family: var(--font-mono, ui-monospace, monospace);
+        font-family: var(--sl-font-mono);
       }
-      button {
-        border: 1px solid var(--color-border-secondary, rgba(0, 0, 0, 0.1));
-        cursor: pointer;
-        padding: 8px 12px;
-        border-radius: var(--border-radius-md, 8px);
-        background: var(--color-background-primary, #fff);
-        color: var(--color-text-primary, #111);
+      .actions {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .actions sl-button::part(base) {
         font-weight: 600;
-        font-size: 12px;
-      }
-      button:disabled {
-        opacity: 0.6;
-        cursor: default;
       }
       .status {
-        margin-top: 8px;
-        font-size: 12px;
-        color: var(--color-text-secondary, #555);
+        margin-top: 6px;
+        font-size: 11px;
+        color: var(--ink-soft);
         min-height: 16px;
       }
+      @media (max-width: 520px) {
+        .actions {
+          width: 100%;
+          justify-content: flex-start;
+        }
+      }
     </style>
+    <script
+      type="module"
+      src="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.20.1/cdn/shoelace-autoloader.js"
+    ></script>
   </head>
   <body>
     <div class="wrap">
-      <div class="card">
-        <h1>Get Time</h1>
-        <p>Simple MCP App example: tool + UI resource.</p>
-        <div class="row">
-          <span class="time" id="time">Waiting for server...</span>
-          <button id="refresh" type="button">Refresh</button>
+      <div class="header">
+        <div>
+          <h1>Get Time</h1>
+          <p>Client ticks locally. Server refreshes on demand.</p>
         </div>
-        <div class="status" id="status">Initializing…</div>
+        <sl-tag size="small" variant="success" id="clientTick">Live</sl-tag>
       </div>
+
+      <div class="grid">
+        <div class="row">
+          <div>
+            <small>Client</small>
+            <div class="time" id="clientTime">--:--:--</div>
+          </div>
+        </div>
+        <div class="row">
+          <div>
+            <small>Server</small>
+            <div class="time" id="serverTime">Waiting for server…</div>
+          </div>
+          <div class="actions">
+            <sl-button
+              size="small"
+              variant="primary"
+              id="refresh"
+              type="button"
+            >
+              Refresh
+            </sl-button>
+          </div>
+        </div>
+      </div>
+
+      <div class="status" id="status">Initializing…</div>
     </div>
     <script>
       let nextId = 1;
-      const timeEl = document.getElementById("time");
+      const clientTimeEl = document.getElementById("clientTime");
+      const serverTimeEl = document.getElementById("serverTime");
       const statusEl = document.getElementById("status");
       const refreshBtn = document.getElementById("refresh");
+      const clientTick = document.getElementById("clientTick");
+
+      let clientIntervalId = null;
 
       function sendRequest(method, params) {
         const id = nextId++;
@@ -110,8 +160,36 @@
         statusEl.textContent = text;
       }
 
-      function setTime(time) {
-        timeEl.textContent = time || "[no time returned]";
+      function formatClientTime(date) {
+        return date.toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit",
+        });
+      }
+
+      function formatServerTime(value) {
+        if (!value) return "[no time returned]";
+        const parsed = new Date(value);
+        if (Number.isNaN(parsed.getTime())) {
+          return value;
+        }
+        return formatClientTime(parsed);
+      }
+
+      function setServerTime(time) {
+        serverTimeEl.textContent = formatServerTime(time);
+      }
+
+      function startClientClock() {
+        if (clientIntervalId !== null) return;
+        const tick = () => {
+          clientTimeEl.textContent = formatClientTime(new Date());
+        };
+        tick();
+        clientIntervalId = window.setInterval(tick, 1000);
+        clientTick.textContent = "Live";
+        clientTick.setAttribute("variant", "success");
       }
 
       function normalizeTime(value) {
@@ -130,7 +208,7 @@
         if (data.method === "ui/notifications/tool-result") {
           const time = normalizeTime(data.params?.content?.[0]?.text);
           if (time) {
-            setTime(time);
+            setServerTime(time);
           }
           setStatus("Ready");
         }
@@ -141,11 +219,11 @@
         setStatus("Refreshing…");
         try {
           const result = await sendRequest("tools/call", {
-            name: "GetTime",
+            name: "get_time",
             arguments: {},
           });
           const time = normalizeTime(result?.content?.[0]?.text);
-          setTime(time);
+          setServerTime(time);
           setStatus("Updated");
         } catch (_err) {
           setStatus("Refresh failed");
@@ -160,6 +238,7 @@
         protocolVersion: "2025-06-18",
       }).then(() => {
         sendNotification("ui/notifications/initialized", {});
+        startClientClock();
         setStatus("Ready");
       });
     </script>
