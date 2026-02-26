@@ -1,0 +1,16 @@
+{
+  "$schema": "https://turborepo.com/schema.json",
+  "extends": ["//"],
+  "tasks": {
+    "build:watch": {
+      "with": ["@repo/ui-lit#build:watch"],
+      "persistent": true,
+      "cache": false
+    },
+    "dev": {
+      "with": ["@repo/ui-lit#build:watch", "build:watch"],
+      "persistent": true,
+      "cache": false
+    }
+  }
+}
