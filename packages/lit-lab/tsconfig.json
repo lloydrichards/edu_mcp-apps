@@ -1,0 +1,7 @@
+{
+  "extends": "@repo/config-typescript/vite.json",
+  "compilerOptions": {
+    "noEmit": true
+  },
+  "include": ["src"]
+}

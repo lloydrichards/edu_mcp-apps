@@ -1,0 +1,29 @@
+{
+  "name": "@repo/lit-lab",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./get_timer.html": "./dist/get_timer.html"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "build:watch": "vite build --watch",
+    "preview": "vite preview",
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/ext-apps": "^1.1.0",
+    "@repo/config-typescript": "workspace:*",
+    "@repo/ui-lit": "workspace:*"
+  },
+  "devDependencies": {
+    "vite": "^7.1.9",
+    "vite-plugin-singlefile": "^2.1.0",
+    "typescript": "^5.9.3"
+  }
+}
