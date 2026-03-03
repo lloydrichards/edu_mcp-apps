@@ -3,7 +3,7 @@
   "extends": ["//"],
   "tasks": {
     "dev": {
-      "with": ["@repo/lit-lab#build:watch"],
+      "with": ["@repo/ui-lit#build:watch", "@repo/lit-lab#build:watch"],
       "persistent": true,
       "cache": false
     }
