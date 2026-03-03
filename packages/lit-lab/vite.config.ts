@@ -24,7 +24,7 @@ export default defineConfig(({ command }) => ({
     assetsDir: "",
     rollupOptions: {
       input: {
-        get_timer: resolve(__dirname, "src/get_timer/index.html"),
+        get_time: resolve(__dirname, "src/get_time/index.html"),
         counter: resolve(__dirname, "src/counter/index.html"),
       },
       output: {

@@ -7,17 +7,23 @@ import {
   RenderBarChartTool,
   renderBarChartHandler,
 } from "./widgets/bar-chart/bar-chart";
-import { GetTimeTool, getTimeHandler } from "./widgets/get-time/get-time";
+import {
+  CounterResourceLayer,
+  CounterTool,
+  renderCounterHandler,
+} from "./widgets/counter/counter";
+import {
+  GetTimeResourceLayer,
+  GetTimeTool,
+  getTimeHandler,
+  RenderGetTimeTool,
+  renderGetTimeHandler,
+} from "./widgets/get-time/get-time";
 import {
   LineChartResourceLayer,
   RenderLineChartTool,
   renderLineChartHandler,
 } from "./widgets/line-chart/line-chart";
-import {
-  LitLabResourceLayer,
-  LitLabTool,
-  renderLitLabHandler,
-} from "./widgets/lit-lab/lit-lab";
 
 import {
   LogExplorerResourceLayer,
@@ -47,7 +53,8 @@ const ResourceLayer = Layer.mergeAll(
   LineChartResourceLayer,
   BarChartResourceLayer,
   LogExplorerResourceLayer,
-  LitLabResourceLayer,
+  GetTimeResourceLayer,
+  CounterResourceLayer,
 );
 
 const UiToolkit = Toolkit.make(
@@ -58,7 +65,8 @@ const UiToolkit = Toolkit.make(
   RenderBarChartTool,
   LogExplorerTool,
   PollLogEntriesTool,
-  LitLabTool,
+  RenderGetTimeTool,
+  CounterTool,
   GetTimeTool,
 );
 
@@ -72,7 +80,8 @@ const UiToolLayer = McpServer.toolkit(UiToolkit).pipe(
       render_bar_chart: renderBarChartHandler,
       render_log_explorer: renderLogExplorerHandler,
       poll_log_entries: pollLogEntriesHandler,
-      render_lit_lab: renderLitLabHandler,
+      render_get_time: renderGetTimeHandler,
+      render_counter: renderCounterHandler,
       get_time: getTimeHandler,
     }),
   ),
