@@ -1,13 +1,22 @@
+import { sep as pathSeparator } from "node:path";
 import { Effect, Schema } from "effect";
 import { McpServer, Tool } from "effect/unstable/ai";
 import { EmptyParams, UiResourceMimeType, uiContent } from "../shared";
 
 const LitLabUiResourceUri = "ui://lit-lab";
 
-const LitLabHtmlUrl = new URL(
-  "../../../../../packages/lit-lab/dist/get_timer.html",
-  import.meta.url,
-);
+const cwd = process.cwd();
+const normalizedCwd = cwd.endsWith(pathSeparator)
+  ? cwd
+  : `${cwd}${pathSeparator}`;
+const relativeLitLabPath = cwd.endsWith(
+  `${pathSeparator}apps${pathSeparator}server-mcp`,
+)
+  ? "../../packages/lit-lab/dist/get_timer.html"
+  : cwd.endsWith(`${pathSeparator}apps`)
+    ? "../packages/lit-lab/dist/get_timer.html"
+    : "packages/lit-lab/dist/get_timer.html";
+const LitLabHtmlUrl = new URL(relativeLitLabPath, `file://${normalizedCwd}`);
 
 export const LitLabResourceLayer = McpServer.resource({
   uri: LitLabUiResourceUri,
