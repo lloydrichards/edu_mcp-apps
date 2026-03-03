@@ -1,0 +1,40 @@
+diff --git a/dist/unstable/ai/Tool.js b/dist/unstable/ai/Tool.js
+index 5934ac472cbd43ff2b1ad3c9889012d270105c05..3bfef3aab8f2206f8d50a387793b3566995e9b3d 100644
+--- a/dist/unstable/ai/Tool.js
++++ b/dist/unstable/ai/Tool.js
+@@ -484,6 +484,15 @@ export const getJsonSchema = (tool, options) => {
+  * @category utilities
+  */
+ export const getJsonSchemaFromSchema = (schema, options) => {
++  const props = AST.isObjects(schema.ast) ? schema.ast.propertySignatures : [];
++  if (props.length === 0) {
++    return {
++      type: "object",
++      properties: {},
++      required: [],
++      additionalProperties: false
++    };
++  }
+   if (Predicate.isNotUndefined(options?.transformer)) {
+     return options.transformer(schema).jsonSchema;
+   }
+diff --git a/src/unstable/ai/Tool.ts b/src/unstable/ai/Tool.ts
+index 3e0b6d7cc3eee7fb9d0cc2cc8ed10cde6cba87c4..e592b7df3c5d1cc5e641bf753d6aa0500dc8c1ec 100644
+--- a/src/unstable/ai/Tool.ts
++++ b/src/unstable/ai/Tool.ts
+@@ -1622,6 +1622,15 @@ export const getJsonSchema = <Tool extends Any>(tool: Tool, options?: {
+ export const getJsonSchemaFromSchema = <S extends Schema.Top>(schema: S, options?: {
+   readonly transformer?: CodecTransformer
+ }): JsonSchema.JsonSchema => {
++  const props = AST.isObjects(schema.ast) ? schema.ast.propertySignatures : []
++  if (props.length === 0) {
++    return {
++      type: "object",
++      properties: {},
++      required: [],
++      additionalProperties: false
++    }
++  }
+   if (Predicate.isNotUndefined(options?.transformer)) {
+     return options.transformer(schema).jsonSchema
+   }

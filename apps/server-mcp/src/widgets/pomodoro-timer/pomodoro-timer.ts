@@ -1,6 +1,6 @@
 import { Effect, Schema } from "effect";
 import { McpServer, Tool } from "effect/unstable/ai";
-import { UiResourceMimeType, uiContent } from "../shared";
+import { EmptyParams, UiResourceMimeType, uiContent } from "../shared";
 
 const PomodoroUiResourceUri = "ui://examples/pomodoro-timer";
 
@@ -19,7 +19,7 @@ export const PomodoroTimerResourceLayer = McpServer.resource({
 
 export const PomodoroTimerTool = Tool.make("render_timer", {
   description: "Render the Pomodoro timer UI",
-  parameters: Schema.Struct({}),
+  parameters: EmptyParams,
   success: Schema.String,
   failure: Schema.Never,
 })

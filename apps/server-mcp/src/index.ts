@@ -76,7 +76,7 @@ const McpLive = Layer.mergeAll(
 );
 
 const ServerConfig = Config.all({
-  port: Config.number("MCP_PORT").pipe(Config.withDefault(() => 9009)),
+  port: Config.number("MCP_PORT").pipe(Config.withDefault(9009)),
 });
 
 const McpRouter = McpServer.layerHttp({
