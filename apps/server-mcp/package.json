@@ -14,6 +14,7 @@
   },
   "dependencies": {
     "@effect/platform-bun": "4.0.0-beta.25",
+    "@repo/lit-lab": "workspace:*",
     "effect": "4.0.0-beta.25"
   },
   "devDependencies": {
