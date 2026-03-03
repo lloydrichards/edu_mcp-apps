@@ -15,35 +15,20 @@ type UiMeta = {
   };
 };
 
-type UiContentSource = string | URL | Array<string | URL>;
+type UiContentSource = string | URL;
 
 const resolveUiPath = (fileName: UiContentSource) =>
   Effect.gen(function* () {
-    const candidates = Array.isArray(fileName) ? fileName : [fileName];
     const fs = yield* FileSystem.FileSystem;
     const pathService = yield* Path.Path;
-    let lastError: unknown = null;
-    for (const candidate of candidates) {
-      const url =
-        typeof candidate === "string"
-          ? new URL(candidate, UiBaseUrl)
-          : candidate;
-      try {
-        const path = yield* pathService.fromFileUrl(url);
-        if (yield* fs.exists(path)) {
-          return path;
-        }
-      } catch (error) {
-        lastError = error;
-      }
+    const url =
+      typeof fileName === "string" ? new URL(fileName, UiBaseUrl) : fileName;
+    const path = yield* pathService.fromFileUrl(url);
+    const exists = yield* fs.exists(path);
+    if (!exists) {
+      throw new Error(`No UI resource found for ${url}`);
     }
-    const lastCandidate = candidates[candidates.length - 1];
-    const lastUrl =
-      typeof lastCandidate === "string"
-        ? new URL(lastCandidate, UiBaseUrl)
-        : lastCandidate;
-    const message = lastError ? `: ${String(lastError)}` : "";
-    throw new Error(`No UI resource found for ${lastUrl}${message}`);
+    return path;
   });
 
 const uiContent = (
