@@ -12,12 +12,12 @@ const normalizedCwd = cwd.endsWith(pathSeparator)
 const relativeLitLabPath = cwd.endsWith(
   `${pathSeparator}apps${pathSeparator}server-mcp`,
 )
-  ? "../../packages/lit-lab/dist/get_timer.html"
+  ? "../../packages/lit-lab/dist/src/get_timer/index.html"
   : cwd.endsWith(`${pathSeparator}apps`)
-    ? "../packages/lit-lab/dist/get_timer.html"
+    ? "../packages/lit-lab/dist/src/get_timer/index.html"
     : cwd.endsWith(`${pathSeparator}server-mcp`)
-      ? "../packages/lit-lab/dist/get_timer.html"
-      : "packages/lit-lab/dist/get_timer.html";
+      ? "../packages/lit-lab/dist/src/get_timer/index.html"
+      : "packages/lit-lab/dist/src/get_timer/index.html";
 const LitLabHtmlUrl = new URL(relativeLitLabPath, `file://${normalizedCwd}`);
 
 export const LitLabResourceLayer = McpServer.resource({

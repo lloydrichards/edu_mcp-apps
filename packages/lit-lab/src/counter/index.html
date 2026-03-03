@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Counter Widget</title>
+    <style>
+      :root {
+        color-scheme: light;
+        font-family: "IBM Plex Sans", "Segoe UI", sans-serif;
+        background: radial-gradient(circle at top, #f6f3ef, #f2e7dd);
+        color: #2b1f16;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+        padding: 24px;
+      }
+
+      .card {
+        width: min(320px, 100%);
+        background: #fff9f2;
+        border-radius: 20px;
+        padding: 24px;
+        box-shadow: 0 24px 60px rgba(79, 42, 18, 0.15);
+        border: 1px solid rgba(79, 42, 18, 0.1);
+      }
+
+      h1 {
+        font-size: 20px;
+        margin: 0 0 12px;
+        letter-spacing: 0.02em;
+      }
+
+      .value {
+        font-size: 56px;
+        font-weight: 600;
+        margin: 12px 0 20px;
+      }
+
+      .actions {
+        display: flex;
+        gap: 12px;
+      }
+
+      button {
+        flex: 1;
+        border: none;
+        border-radius: 999px;
+        padding: 10px 16px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        background: #2b1f16;
+        color: #fff9f2;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+      }
+
+      button.secondary {
+        background: #fff1e1;
+        color: #2b1f16;
+        border: 1px solid rgba(43, 31, 22, 0.2);
+      }
+
+      button:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 10px 20px rgba(43, 31, 22, 0.2);
+      }
+    </style>
+    <script type="module" src="/src/counter/counter.ts"></script>
+  </head>
+  <body>
+    <div class="card">
+      <h1>Daily Counter</h1>
+      <div class="value" id="count">0</div>
+      <div class="actions">
+        <button class="secondary" id="decrement" type="button">Decrease</button>
+        <button id="increment" type="button">Increase</button>
+      </div>
+    </div>
+  </body>
+</html>

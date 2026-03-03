@@ -56,7 +56,7 @@ const connectApp = async () => {
   if (!card) return;
 
   try {
-    card.status = "Initializing…";
+    card.status = "Initializing...";
     await sendRequest("ui/initialize", {
       appCapabilities: {},
       appInfo: { name: "get-time", version: "0.1.0" },
@@ -83,7 +83,7 @@ const connectApp = async () => {
 
   card.addEventListener("refresh", async () => {
     card.refreshing = true;
-    card.status = "Refreshing…";
+    card.status = "Refreshing...";
     try {
       const result = await sendRequest("tools/call", {
         name: "get_time",
