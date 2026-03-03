@@ -1,6 +1,6 @@
 import { Effect, Schema } from "effect";
 import { McpServer, Tool } from "effect/unstable/ai";
-import { UiResourceMimeType, uiContent } from "../shared";
+import { EmptyParams, UiResourceMimeType, uiContent } from "../shared";
 
 const PollingUiResourceUri = "ui://examples/polling-dashboard";
 
@@ -14,7 +14,7 @@ export const PollingDashboardResourceLayer = McpServer.resource({
 
 export const PollingDashboardTool = Tool.make("render_dashboard", {
   description: "Render the polling dashboard UI",
-  parameters: Schema.Struct({}),
+  parameters: EmptyParams,
   success: Schema.String,
   failure: Schema.Never,
 })
@@ -35,7 +35,7 @@ const DashboardStats = Schema.Struct({
 
 export const PollDashboardStatsTool = Tool.make("get_dashboard_stats", {
   description: "Returns latest dashboard stats for the polling UI",
-  parameters: Schema.Struct({}),
+  parameters: EmptyParams,
   success: DashboardStats,
   failure: Schema.Never,
 }).annotate(Tool.Meta, {

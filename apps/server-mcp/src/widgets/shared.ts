@@ -1,7 +1,9 @@
-import { Effect } from "effect";
+import { Effect, Schema } from "effect";
 
 const UiResourceMimeType = "text/html;profile=mcp-app";
 const UiBaseUrl = new URL("./", import.meta.url);
+
+export const EmptyParams = Schema.Record(Schema.String, Schema.Never);
 
 type UiMeta = {
   prefersBorder?: boolean;
