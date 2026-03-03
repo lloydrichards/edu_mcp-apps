@@ -37,4 +37,4 @@ COPY --from=builder /app/packages/lit-lab/dist ./packages/lit-lab/dist
 
 EXPOSE 8000
 
-CMD ["bun", "--cwd", "/app", "run", "./server-mcp/index.js"]
+CMD ["bun", "--cwd", "/app/server-mcp", "run", "./index.js"]

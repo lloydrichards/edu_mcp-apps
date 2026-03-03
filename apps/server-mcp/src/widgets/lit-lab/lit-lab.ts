@@ -15,7 +15,9 @@ const relativeLitLabPath = cwd.endsWith(
   ? "../../packages/lit-lab/dist/get_timer.html"
   : cwd.endsWith(`${pathSeparator}apps`)
     ? "../packages/lit-lab/dist/get_timer.html"
-    : "packages/lit-lab/dist/get_timer.html";
+    : cwd.endsWith(`${pathSeparator}server-mcp`)
+      ? "../packages/lit-lab/dist/get_timer.html"
+      : "packages/lit-lab/dist/get_timer.html";
 const LitLabHtmlUrl = new URL(relativeLitLabPath, `file://${normalizedCwd}`);
 
 export const LitLabResourceLayer = McpServer.resource({
