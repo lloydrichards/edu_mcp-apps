@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "exports": {
-    "./get_timer.html": "./dist/src/get_timer/index.html",
+    "./get_time.html": "./dist/src/get_time/index.html",
     "./counter.html": "./dist/src/counter/index.html"
   },
   "files": [

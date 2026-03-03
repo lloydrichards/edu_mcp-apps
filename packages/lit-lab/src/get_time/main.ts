@@ -7,11 +7,7 @@ const mount = () => {
     appRoot.id = "app";
     document.body.append(appRoot);
   }
-  appRoot.innerHTML = `
-    <div style="padding: 12px;">
-      <get-time-card></get-time-card>
-    </div>
-  `;
+  appRoot.innerHTML = "<get-time-card></get-time-card>";
 };
 
 const normalizeTime = (value: unknown) => {

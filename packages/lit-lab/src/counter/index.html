@@ -3,82 +3,146 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="light dark" />
     <title>Counter Widget</title>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.20.1/cdn/themes/light.css"
+    />
     <style>
       :root {
-        color-scheme: light;
-        font-family: "IBM Plex Sans", "Segoe UI", sans-serif;
-        background: radial-gradient(circle at top, #f6f3ef, #f2e7dd);
-        color: #2b1f16;
+        font-family: var(
+          --font-sans,
+          var(--sl-font-sans, system-ui, sans-serif)
+        );
+        color: var(--color-text-primary, var(--sl-color-neutral-900, #1f1f1f));
+        --sl-color-primary-600: #4b3a2b;
+        --sl-color-primary-500: #6b533f;
+        --sl-border-radius-medium: 14px;
+      }
+
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        background: transparent;
+      }
+
+      * {
+        box-sizing: border-box;
       }
 
       body {
-        margin: 0;
-        min-height: 100vh;
-        display: grid;
-        place-items: center;
-        padding: 24px;
+        padding: 12px;
+        font-family: inherit;
+        color: inherit;
+        line-height: 1;
+        height: 76px;
       }
 
-      .card {
-        width: min(320px, 100%);
-        background: #fff9f2;
-        border-radius: 20px;
-        padding: 24px;
-        box-shadow: 0 24px 60px rgba(79, 42, 18, 0.15);
-        border: 1px solid rgba(79, 42, 18, 0.1);
+      .pill {
+        width: 100%;
+        max-width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        height: 52px;
+        padding: 10px 12px;
+        border-radius: var(--sl-border-radius-medium);
+        border: 1px solid
+          var(--color-border-secondary, var(--sl-color-neutral-200, #e4e4e7));
+        background: var(
+          --color-background-secondary,
+          var(--sl-color-neutral-0, #ffffff)
+        );
+        color: var(--color-text-primary, var(--sl-color-neutral-900, #1f1f1f));
       }
 
-      h1 {
-        font-size: 20px;
-        margin: 0 0 12px;
-        letter-spacing: 0.02em;
-      }
-
-      .value {
-        font-size: 56px;
+      .label strong {
+        font-size: 14px;
         font-weight: 600;
-        margin: 12px 0 20px;
+        letter-spacing: 0.01em;
+      }
+
+      .label span {
+        font-size: 11px;
+        color: var(
+          --color-text-secondary,
+          var(--sl-color-neutral-600, #616161)
+        );
+      }
+
+      .count {
+        min-width: 64px;
+        text-align: center;
+        font-size: 20px;
+        font-weight: 700;
+        font-family: var(
+          --font-mono,
+          var(--sl-font-mono, ui-monospace, monospace)
+        );
+        padding: 6px 12px;
+        border-radius: 999px;
+        background: var(
+          --color-background-primary,
+          var(--sl-color-neutral-100, #f4f4f5)
+        );
+        border: 1px solid
+          var(--color-border-secondary, var(--sl-color-neutral-200, #e4e4e7));
       }
 
       .actions {
         display: flex;
-        gap: 12px;
+        align-items: center;
+        gap: 6px;
+        height: 32px;
       }
 
-      button {
-        flex: 1;
-        border: none;
-        border-radius: 999px;
-        padding: 10px 16px;
-        font-size: 14px;
+      sl-button {
+        display: inline-flex;
+        width: 32px;
+        height: 32px;
+      }
+
+      sl-button::part(base) {
         font-weight: 600;
-        cursor: pointer;
-        background: #2b1f16;
-        color: #fff9f2;
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
-      }
-
-      button.secondary {
-        background: #fff1e1;
-        color: #2b1f16;
-        border: 1px solid rgba(43, 31, 22, 0.2);
-      }
-
-      button:hover {
-        transform: translateY(-1px);
-        box-shadow: 0 10px 20px rgba(43, 31, 22, 0.2);
+        width: 32px;
+        height: 32px;
       }
     </style>
+    <script
+      type="module"
+      src="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.20.1/cdn/shoelace-autoloader.js"
+    ></script>
     <script type="module" src="/src/counter/counter.ts"></script>
   </head>
   <body>
-    <div class="card">
-      <h1>Daily Counter</h1>
-      <div class="value" id="count">0</div>
+    <div class="pill">
+      <div class="label">
+        <strong>Counter</strong>
+        <span>Lightweight demo</span>
+      </div>
+      <div class="count" id="count">0</div>
       <div class="actions">
-        <button class="secondary" id="decrement" type="button">Decrease</button>
-        <button id="increment" type="button">Increase</button>
+        <sl-button
+          size="small"
+          circle
+          variant="default"
+          id="decrement"
+          type="button"
+        >
+          -
+        </sl-button>
+        <sl-button
+          size="small"
+          circle
+          variant="primary"
+          id="increment"
+          type="button"
+        >
+          +
+        </sl-button>
       </div>
     </div>
   </body>
