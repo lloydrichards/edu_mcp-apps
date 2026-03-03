@@ -17,6 +17,7 @@ COPY --from=pruner /app/out/json/ .
 COPY --from=pruner /app/out/full/ .
 
 RUN bun install
+RUN bun run build --filter=lit-lab...
 RUN bun run build --filter=server-mcp...
 
 # Step 3: Production image, copy all the files and run next
@@ -32,6 +33,7 @@ USER server-mcp
 COPY --from=builder /app/apps/server-mcp/dist/index.js ./server-mcp/index.js
 COPY --from=builder /app/apps/server-mcp/package.json ./server-mcp/package.json
 COPY --from=builder /app/apps/server-mcp/src/widgets ./server-mcp
+COPY --from=builder /app/packages/lit-lab/dist ./packages/lit-lab/dist
 
 EXPOSE 8000
 
