@@ -92,6 +92,9 @@ const McpLive = Layer.mergeAll(
   ResourceLayer,
   UiToolLayer,
   LogExplorerStateLayer,
+  McpServer.serverExtensions({
+    "io.modelcontextprotocol/ui": {},
+  }),
 );
 
 const ServerConfig = Config.all({

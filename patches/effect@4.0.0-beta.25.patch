@@ -1,0 +1,318 @@
+diff --git a/dist/unstable/ai/McpServer.d.ts b/dist/unstable/ai/McpServer.d.ts
+index 79ee560449295f4914e93807c34e14314776f86b..e97cf36e693c46cd8658374546e6e0fc9e91f537 100644
+--- a/dist/unstable/ai/McpServer.d.ts
++++ b/dist/unstable/ai/McpServer.d.ts
+@@ -1,5 +1,6 @@
+ import * as Effect from "../../Effect.ts";
+ import * as Layer from "../../Layer.ts";
++import * as Option from "../../Option.ts";
+ import * as Queue from "../../Queue.ts";
+ import * as Schema from "../../Schema.ts";
+ import * as ServiceMap from "../../ServiceMap.ts";
+@@ -9,7 +10,7 @@ import * as RpcClient from "../rpc/RpcClient.ts";
+ import type * as RpcGroup from "../rpc/RpcGroup.ts";
+ import * as RpcMessage from "../rpc/RpcMessage.ts";
+ import * as RpcServer from "../rpc/RpcServer.ts";
+-import { CallToolResult, CompleteResult, ElicitationDeclined, GetPromptResult, InternalError, InvalidParams, McpServerClient, Prompt, Resource, ResourceTemplate, ServerNotificationRpcs, Tool as McpTool } from "./McpSchema.ts";
++import { CallToolResult, CompleteResult, ElicitationDeclined, GetPromptResult, Initialize, InternalError, InvalidParams, McpServerClient, Prompt, Resource, ResourceTemplate, ServerNotificationRpcs, Tool as McpTool } from "./McpSchema.ts";
+ import type { CallTool, Complete, GetPrompt, Param, PromptMessage, ReadResourceResult } from "./McpSchema.ts";
+ import * as Tool from "./Tool.ts";
+ import type * as Toolkit from "./Toolkit.ts";
+@@ -41,6 +42,16 @@ declare const McpServer_base: ServiceMap.ServiceClass<McpServer, "effect/ai/McpS
+     }) => Effect.Effect<void>;
+     readonly getPromptResult: (request: typeof GetPrompt.payloadSchema.Type) => Effect.Effect<GetPromptResult, InternalError | InvalidParams, McpServerClient>;
+     readonly completion: (complete: typeof Complete.payloadSchema.Type) => Effect.Effect<CompleteResult, InternalError, McpServerClient>;
++    readonly getClientInitialize: (clientId: number) => Option.Option<typeof Initialize.payloadSchema.Type>;
++    readonly setClientInitialize: (clientId: number, init: typeof Initialize.payloadSchema.Type) => Effect.Effect<void>;
++    readonly serverExtensions: Record<string, Schema.Json>;
++    readonly addServerExtensions: (extensions: Record<string, Schema.Json>) => Effect.Effect<void>;
++    readonly toolsTransforms: ReadonlyArray<ToolsTransformer>;
++    readonly addToolsTransform: (transform: ToolsTransformer) => Effect.Effect<void>;
++    readonly resourcesTransforms: ReadonlyArray<ResourcesTransformer>;
++    readonly addResourcesTransform: (transform: ResourcesTransformer) => Effect.Effect<void>;
++    readonly promptsTransforms: ReadonlyArray<PromptsTransformer>;
++    readonly addPromptsTransform: (transform: PromptsTransformer) => Effect.Effect<void>;
+ }>;
+ /**
+  * @since 4.0.0
+@@ -78,6 +89,16 @@ export declare class McpServer extends McpServer_base {
+         }) => Effect.Effect<void>;
+         readonly getPromptResult: (request: typeof GetPrompt.payloadSchema.Type) => Effect.Effect<GetPromptResult, InternalError | InvalidParams, McpServerClient>;
+         readonly completion: (complete: typeof Complete.payloadSchema.Type) => Effect.Effect<CompleteResult, InternalError, McpServerClient>;
++        readonly getClientInitialize: (clientId: number) => Option.Option<typeof Initialize.payloadSchema.Type>;
++        readonly setClientInitialize: (clientId: number, init: typeof Initialize.payloadSchema.Type) => Effect.Effect<void>;
++        readonly serverExtensions: Record<string, Schema.Json>;
++        readonly addServerExtensions: (extensions: Record<string, Schema.Json>) => Effect.Effect<void>;
++        readonly toolsTransforms: ReadonlyArray<ToolsTransformer>;
++        readonly addToolsTransform: (transform: ToolsTransformer) => Effect.Effect<void>;
++        readonly resourcesTransforms: ReadonlyArray<ResourcesTransformer>;
++        readonly addResourcesTransform: (transform: ResourcesTransformer) => Effect.Effect<void>;
++        readonly promptsTransforms: ReadonlyArray<PromptsTransformer>;
++        readonly addPromptsTransform: (transform: PromptsTransformer) => Effect.Effect<void>;
+     }, never, import("../../Scope.ts").Scope>;
+     /**
+      * @since 4.0.0
+@@ -172,6 +193,77 @@ export declare const layerHttp: (options: {
+     readonly version: string;
+     readonly path: HttpRouter.PathInput;
+ }) => Layer.Layer<McpServer | McpServerClient, never, HttpRouter.HttpRouter>;
++/**
++ * @since 4.0.0
++ * @category server
++ */
++export type ToolsTransformer = (items: ReadonlyArray<McpTool>, init: Option.Option<typeof Initialize.payloadSchema.Type>) => Effect.Effect<ReadonlyArray<McpTool>, never, never>;
++/**
++ * @since 4.0.0
++ * @category server
++ */
++export type ResourcesTransformer = (items: ReadonlyArray<Resource>, init: Option.Option<typeof Initialize.payloadSchema.Type>) => Effect.Effect<ReadonlyArray<Resource>, never, never>;
++/**
++ * @since 4.0.0
++ * @category server
++ */
++export type PromptsTransformer = (items: ReadonlyArray<Prompt>, init: Option.Option<typeof Initialize.payloadSchema.Type>) => Effect.Effect<ReadonlyArray<Prompt>, never, never>;
++/**
++ * Register MCP server extension capabilities.
++ *
++ * @since 4.0.0
++ * @category server
++ */
++export declare const registerServerExtensions: (extensions: Record<string, Schema.Json>) => Effect.Effect<void, never, McpServer>;
++/**
++ * Register MCP server extension capabilities.
++ *
++ * @since 4.0.0
++ * @category server
++ */
++export declare const serverExtensions: (extensions: Record<string, Schema.Json>) => Layer.Layer<never, never, never>;
++/**
++ * Register a list transform for tools/resources/prompts.
++ *
++ * @since 4.0.0
++ * @category server
++ */
++export declare const registerToolsTransform: (transform: ToolsTransformer) => Effect.Effect<void, never, McpServer>;
++/**
++ * Register a tools list transform with the McpServer.
++ *
++ * @since 4.0.0
++ * @category server
++ */
++export declare const toolsTransform: (transform: ToolsTransformer) => Layer.Layer<never, never, never>;
++/**
++ * Register a resource list transform.
++ *
++ * @since 4.0.0
++ * @category server
++ */
++export declare const registerResourcesTransform: (transform: ResourcesTransformer) => Effect.Effect<void, never, McpServer>;
++/**
++ * Register a resources list transform with the McpServer.
++ *
++ * @since 4.0.0
++ * @category server
++ */
++export declare const resourcesTransform: (transform: ResourcesTransformer) => Layer.Layer<never, never, never>;
++/**
++ * Register a prompt list transform.
++ *
++ * @since 4.0.0
++ * @category server
++ */
++export declare const registerPromptsTransform: (transform: PromptsTransformer) => Effect.Effect<void, never, McpServer>;
++/**
++ * Register a prompts list transform with the McpServer.
++ *
++ * @since 4.0.0
++ * @category server
++ */
++export declare const promptsTransform: (transform: PromptsTransformer) => Layer.Layer<never, never, never>;
+ /**
+  * Register a `Toolkit` with the `McpServer`.
+  *
+diff --git a/dist/unstable/ai/McpServer.js b/dist/unstable/ai/McpServer.js
+index 88cab11566046abb5dae418501aff62c5bc18912..e8b9e76e2d9742b730a0290f1b49ef662903d088 100644
+--- a/dist/unstable/ai/McpServer.js
++++ b/dist/unstable/ai/McpServer.js
+@@ -40,6 +40,11 @@ export class McpServer extends /*#__PURE__*/ServiceMap.Service()("effect/ai/McpS
+     const prompts = [];
+     const promptMap = new Map();
+     const completionsMap = new Map();
++    const clientInitialize = new Map();
++    const serverExtensions = {};
++    const toolsTransforms = [];
++    const resourcesTransforms = [];
++    const promptsTransforms = [];
+     const notificationsQueue = yield* Queue.make();
+     const listChangedHandles = new Map();
+     const notifications = yield* RpcClient.makeNoSerialization(ServerNotificationRpcs, {
+@@ -161,6 +166,26 @@ export class McpServer extends /*#__PURE__*/ServiceMap.Service()("effect/ai/McpS
+         const key = ref.type === "ref/resource" ? `ref/resource/${ref.uri}/${complete.argument.name}` : `ref/prompt/${ref.name}/${complete.argument.name}`;
+         const handler = completionsMap.get(key);
+         return handler ? yield* handler(complete.argument.value) : CompleteResult.empty;
++      }),
++      getClientInitialize: clientId => Option.fromNullishOr(clientInitialize.get(clientId)),
++      setClientInitialize: (clientId, init) => Effect.sync(() => {
++        clientInitialize.set(clientId, init);
++      }),
++      serverExtensions,
++      addServerExtensions: extensions => Effect.sync(() => {
++        Object.assign(serverExtensions, extensions);
++      }),
++      toolsTransforms,
++      addToolsTransform: transform => Effect.sync(() => {
++        toolsTransforms.push(transform);
++      }),
++      resourcesTransforms,
++      addResourcesTransform: transform => Effect.sync(() => {
++        resourcesTransforms.push(transform);
++      }),
++      promptsTransforms,
++      addPromptsTransform: transform => Effect.sync(() => {
++        promptsTransforms.push(transform);
+       })
+     });
+   });
+@@ -349,6 +374,74 @@ export const layerStdio = options => layer(options).pipe(Layer.provide(RpcServer
+  * @category layers
+  */
+ export const layerHttp = options => layer(options).pipe(Layer.provide(RpcServer.layerProtocolHttp(options)), Layer.provide(RpcSerialization.layerJsonRpc()));
++/**
++ * Register MCP server extension capabilities.
++ *
++ * @since 4.0.0
++ * @category server
++ */
++export const registerServerExtensions = extensions => Effect.gen(function* () {
++  const server = yield* McpServer;
++  yield* server.addServerExtensions(extensions);
++});
++/**
++ * Register MCP server extension capabilities.
++ *
++ * @since 4.0.0
++ * @category server
++ */
++export const serverExtensions = extensions => Layer.effectDiscard(registerServerExtensions(extensions)).pipe(Layer.provide(McpServer.layer));
++/**
++ * Register a list transform for tools/resources/prompts.
++ *
++ * @since 4.0.0
++ * @category server
++ */
++export const registerToolsTransform = transform => Effect.gen(function* () {
++  const server = yield* McpServer;
++  yield* server.addToolsTransform(transform);
++});
++/**
++ * Register a tools list transform with the McpServer.
++ *
++ * @since 4.0.0
++ * @category server
++ */
++export const toolsTransform = transform => Layer.effectDiscard(registerToolsTransform(transform)).pipe(Layer.provide(McpServer.layer));
++/**
++ * Register a resource list transform.
++ *
++ * @since 4.0.0
++ * @category server
++ */
++export const registerResourcesTransform = transform => Effect.gen(function* () {
++  const server = yield* McpServer;
++  yield* server.addResourcesTransform(transform);
++});
++/**
++ * Register a resources list transform with the McpServer.
++ *
++ * @since 4.0.0
++ * @category server
++ */
++export const resourcesTransform = transform => Layer.effectDiscard(registerResourcesTransform(transform)).pipe(Layer.provide(McpServer.layer));
++/**
++ * Register a prompt list transform.
++ *
++ * @since 4.0.0
++ * @category server
++ */
++export const registerPromptsTransform = transform => Effect.gen(function* () {
++  const server = yield* McpServer;
++  yield* server.addPromptsTransform(transform);
++});
++/**
++ * Register a prompts list transform with the McpServer.
++ *
++ * @since 4.0.0
++ * @category server
++ */
++export const promptsTransform = transform => Layer.effectDiscard(registerPromptsTransform(transform)).pipe(Layer.provide(McpServer.layer));
+ /**
+  * Register a `Toolkit` with the `McpServer`.
+  *
+@@ -670,12 +763,15 @@ const layerHandlers = serverInfo => ClientRpcs.toLayer(Effect.gen(function* () {
+           listChanged: true
+         };
+       }
++      if (Object.keys(server.serverExtensions).length > 0) {
++        capabilities.extensions = server.serverExtensions;
++      }
+       server.initializedClients.add(clientId);
+-      return Effect.succeed({
++      return server.setClientInitialize(clientId, params).pipe(Effect.as({
+         capabilities,
+         serverInfo,
+         protocolVersion: SUPPORTED_PROTOCOL_VERSIONS.includes(requestedVersion) ? requestedVersion : LATEST_PROTOCOL_VERSION
+-      });
++      }));
+     },
+     "completion/complete": r => server.completion(r).pipe(Effect.provideService(CurrentLogLevel, currentLogLevel)),
+     "logging/setLevel": ({
+@@ -703,12 +799,24 @@ const layerHandlers = serverInfo => ClientRpcs.toLayer(Effect.gen(function* () {
+       }
+     }),
+     "prompts/get": r => server.getPromptResult(r).pipe(Effect.provideService(CurrentLogLevel, currentLogLevel)),
+-    "prompts/list": () => Effect.sync(() => new ListPromptsResult({
+-      prompts: server.prompts
+-    })),
+-    "resources/list": () => Effect.sync(() => new ListResourcesResult({
+-      resources: server.resources
+-    })),
++    "prompts/list": (_r, {
++      clientId
++    }) => {
++      const init = server.getClientInitialize(clientId);
++      const result = server.promptsTransforms.reduce((acc, transform) => acc.pipe(Effect.flatMap(items => transform(items, init))), Effect.succeed(server.prompts));
++      return Effect.map(result, prompts => new ListPromptsResult({
++        prompts
++      }));
++    },
++    "resources/list": (_r, {
++      clientId
++    }) => {
++      const init = server.getClientInitialize(clientId);
++      const result = server.resourcesTransforms.reduce((acc, transform) => acc.pipe(Effect.flatMap(items => transform(items, init))), Effect.succeed(server.resources));
++      return Effect.map(result, resources => new ListResourcesResult({
++        resources
++      }));
++    },
+     "resources/read": ({
+       uri
+     }) => server.findResource(uri).pipe(Effect.provideService(CurrentLogLevel, currentLogLevel)),
+@@ -718,9 +826,15 @@ const layerHandlers = serverInfo => ClientRpcs.toLayer(Effect.gen(function* () {
+       resourceTemplates: server.resourceTemplates
+     })),
+     "tools/call": r => server.callTool(r).pipe(Effect.provideService(CurrentLogLevel, currentLogLevel)),
+-    "tools/list": () => Effect.sync(() => new ListToolsResult({
+-      tools: server.tools
+-    })),
++    "tools/list": (_r, {
++      clientId
++    }) => {
++      const init = server.getClientInitialize(clientId);
++      const result = server.toolsTransforms.reduce((acc, transform) => acc.pipe(Effect.flatMap(items => transform(items, init))), Effect.succeed(server.tools));
++      return Effect.map(result, tools => new ListToolsResult({
++        tools
++      }));
++    },
+     // Notifications
+     "notifications/cancelled": _ => Effect.void,
+     "notifications/initialized": _ => Effect.void,
