@@ -68,6 +68,9 @@
       },
     },
   },
+  "patchedDependencies": {
+    "effect@4.0.0-beta.25": "patches/effect@4.0.0-beta.25.patch",
+  },
   "packages": {
     "@babel/helper-string-parser": ["@babel/helper-string-parser@7.27.1", "", {}, "sha512-qMlSxKbpRlAridDExk92nSobyDdpPijUq2DW6oDnUqd0iOGxmQjyqhMIihI9+zv4LPyZdRje2cavWPbCbWm3eA=="],
 
