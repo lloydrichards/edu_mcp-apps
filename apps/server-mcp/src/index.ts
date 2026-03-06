@@ -92,9 +92,6 @@ const McpLive = Layer.mergeAll(
   ResourceLayer,
   UiToolLayer,
   LogExplorerStateLayer,
-  McpServer.serverExtensions({
-    "io.modelcontextprotocol/ui": {},
-  }),
 );
 
 const ServerConfig = Config.all({
@@ -105,6 +102,9 @@ const McpRouter = McpServer.layerHttp({
   name: "Edu MCP App Server",
   version: "0.2.0",
   path: "/mcp",
+  extensions: {
+    "io.modelcontextprotocol/ui": {},
+  },
 }).pipe(
   Layer.provideMerge(McpLive),
   Layer.provide(
