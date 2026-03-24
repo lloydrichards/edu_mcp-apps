@@ -1,7 +1,7 @@
 import { sep as pathSeparator } from "node:path";
 import { Effect, Schema } from "effect";
 import { McpServer, Tool } from "effect/unstable/ai";
-import { EmptyParams, UiResourceMimeType, uiContent } from "../shared";
+import { UiResourceMimeType, uiContent } from "../shared";
 
 const GetTimeUiResourceUri = "ui://get-time";
 
@@ -30,7 +30,7 @@ export const GetTimeResourceLayer = McpServer.resource({
 
 export const RenderGetTimeTool = Tool.make("render_get_time", {
   description: "Render the get time UI",
-  parameters: EmptyParams,
+  parameters: Tool.EmptyParams,
   success: Schema.String,
   failure: Schema.Never,
 })
@@ -46,7 +46,7 @@ export const renderGetTimeHandler = () =>
 
 export const GetTimeTool = Tool.make("get_time", {
   description: "Returns the current server time",
-  parameters: EmptyParams,
+  parameters: Tool.EmptyParams,
   success: Schema.String,
   failure: Schema.Never,
 }).annotate(Tool.Title, "Get Time");

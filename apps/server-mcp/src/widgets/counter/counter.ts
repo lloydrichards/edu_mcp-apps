@@ -1,7 +1,7 @@
 import { sep as pathSeparator } from "node:path";
 import { Effect, Schema } from "effect";
 import { McpServer, Tool } from "effect/unstable/ai";
-import { EmptyParams, UiResourceMimeType, uiContent } from "../shared";
+import { UiResourceMimeType, uiContent } from "../shared";
 
 const CounterUiResourceUri = "ui://lit-lab/counter";
 
@@ -30,7 +30,7 @@ export const CounterResourceLayer = McpServer.resource({
 
 export const CounterTool = Tool.make("render_counter", {
   description: "Render the counter widget UI",
-  parameters: EmptyParams,
+  parameters: Tool.EmptyParams,
   success: Schema.String,
   failure: Schema.Never,
 })
