@@ -2,6 +2,9 @@
   "$schema": "https://turborepo.com/schema.json",
   "extends": ["//"],
   "tasks": {
+    "type-check": {
+      "dependsOn": ["@repo/ui-lit#build"]
+    },
     "build:watch": {
       "with": ["@repo/ui-lit#build:watch"],
       "persistent": true,
