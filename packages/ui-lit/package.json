@@ -8,8 +8,10 @@
   ],
   "main": "./dist/ui-lit.umd.cjs",
   "module": "./dist/ui-lit.js",
+  "types": "./dist/lib/main.d.ts",
   "exports": {
     ".": {
+      "types": "./dist/lib/main.d.ts",
       "import": "./dist/ui-lit.js",
       "require": "./dist/ui-lit.umd.cjs"
     }
