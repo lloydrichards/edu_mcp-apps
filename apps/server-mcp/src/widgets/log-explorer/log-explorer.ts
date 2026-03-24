@@ -1,6 +1,6 @@
 import { Effect, Layer, Ref, Schedule, Schema } from "effect";
 import { McpServer, Tool } from "effect/unstable/ai";
-import { EmptyParams, UiResourceMimeType, uiContent } from "../shared";
+import { UiResourceMimeType, uiContent } from "../shared";
 
 const LogExplorerUiResourceUri = "ui://examples/log-explorer";
 const MaxLogEntries = 200;
@@ -91,7 +91,7 @@ export const LogExplorerResourceLayer = McpServer.resource({
 
 export const LogExplorerTool = Tool.make("render_log_explorer", {
   description: "Render the log explorer UI",
-  parameters: EmptyParams,
+  parameters: Tool.EmptyParams,
   success: Schema.String,
   failure: Schema.Never,
 })
