@@ -1,34 +1,35 @@
 import { Effect, Schema } from "effect";
-import { McpServer, Tool } from "effect/unstable/ai";
-import { UiResourceMimeType, uiContent } from "../shared";
+import { Tool } from "effect/unstable/ai";
+import { makeUiRenderTool, makeUiResource } from "../../service/McpAppService";
 
 const PomodoroUiResourceUri = "ui://examples/pomodoro-timer";
 
-export const PomodoroTimerResourceLayer = McpServer.resource({
-  uri: PomodoroUiResourceUri,
-  name: "Pomodoro Timer",
-  description: "Pomodoro timer UI built with web components",
-  mimeType: UiResourceMimeType,
-  content: uiContent(PomodoroUiResourceUri, "pomodoro-timer/index.html", {
-    prefersBorder: true,
-    csp: {
-      resourceDomains: ["https://cdn.jsdelivr.net"],
-    },
-  }),
-});
+const PomodoroHtml = await Bun.file(
+  new URL("./index.html", import.meta.url),
+).text();
 
-export const PomodoroTimerTool = Tool.make("render_timer", {
+export const PomodoroTimerResourceLayer = makeUiResource(
+  PomodoroUiResourceUri,
+  {
+    name: "Pomodoro Timer",
+    description: "Pomodoro timer UI built with web components",
+    html: PomodoroHtml,
+    meta: {
+      prefersBorder: true,
+      csp: {
+        resourceDomains: ["https://cdn.jsdelivr.net"],
+      },
+    },
+  },
+);
+
+export const PomodoroTimerTool = makeUiRenderTool(PomodoroUiResourceUri, {
+  name: "render_timer",
+  title: "Pomodoro Timer",
   description: "Render the Pomodoro timer UI",
   parameters: Tool.EmptyParams,
   success: Schema.String,
-  failure: Schema.Never,
-})
-  .annotate(Tool.Title, "Pomodoro Timer")
-  .annotate(Tool.Meta, {
-    ui: {
-      resourceUri: PomodoroUiResourceUri,
-    },
-  });
+});
 
 export const renderTimerHandler = () =>
   Effect.succeed("Pomodoro timer ready. Use the UI to start.");

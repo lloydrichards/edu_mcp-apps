@@ -1,21 +1,24 @@
 import { Effect, Schema } from "effect";
-import { McpServer, Tool } from "effect/unstable/ai";
-import { UiResourceMimeType, uiContent } from "../shared";
+import { Tool } from "effect/unstable/ai";
+import { makeUiRenderTool, makeUiResource } from "../../service/McpAppService";
 
 const BarChartUiResourceUri = "ui://examples/bar-chart";
 
-export const BarChartResourceLayer = McpServer.resource({
-  uri: BarChartUiResourceUri,
+const BarChartHtml = await Bun.file(
+  new URL("./index.html", import.meta.url),
+).text();
+
+export const BarChartResourceLayer = makeUiResource(BarChartUiResourceUri, {
   name: "Bar Chart",
   description: "Bar chart UI powered by sszvis",
-  mimeType: UiResourceMimeType,
-  content: uiContent(BarChartUiResourceUri, "bar-chart/index.html", {
+  html: BarChartHtml,
+  meta: {
     prefersBorder: true,
     csp: {
       resourceDomains: ["https://cdn.jsdelivr.net"],
       connectDomains: ["https://cdn.jsdelivr.net"],
     },
-  }),
+  },
 });
 
 const BarChartNumber = Schema.Union([Schema.Number, Schema.NumberFromString]);
@@ -36,18 +39,13 @@ export const BarChartPayload = Schema.Struct({
   props: Schema.optional(BarChartProps),
 });
 
-export const RenderBarChartTool = Tool.make("render_bar_chart", {
+export const RenderBarChartTool = makeUiRenderTool(BarChartUiResourceUri, {
+  name: "render_bar_chart",
+  title: "Bar Chart",
   description: "Render a categorical bar chart",
   parameters: BarChartPayload,
   success: BarChartPayload,
-  failure: Schema.Never,
-})
-  .annotate(Tool.Title, "Bar Chart")
-  .annotate(Tool.Meta, {
-    ui: {
-      resourceUri: BarChartUiResourceUri,
-    },
-  });
+});
 
 export const renderBarChartHandler = (payload: typeof BarChartPayload.Type) =>
   Effect.succeed(payload);

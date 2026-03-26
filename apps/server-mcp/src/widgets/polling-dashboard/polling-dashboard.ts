@@ -1,29 +1,33 @@
 import { Effect, Schema } from "effect";
-import { McpServer, Tool } from "effect/unstable/ai";
-import { UiResourceMimeType, uiContent } from "../shared";
+import { Tool } from "effect/unstable/ai";
+import {
+  makeUiAppTool,
+  makeUiRenderTool,
+  makeUiResource,
+} from "../../service/McpAppService";
 
 const PollingUiResourceUri = "ui://examples/polling-dashboard";
 
-export const PollingDashboardResourceLayer = McpServer.resource({
-  uri: PollingUiResourceUri,
-  name: "Polling Dashboard",
-  description: "Polling dashboard example UI",
-  mimeType: UiResourceMimeType,
-  content: uiContent(PollingUiResourceUri, "polling-dashboard/index.html"),
-});
+const PollingDashboardHtml = await Bun.file(
+  new URL("./index.html", import.meta.url),
+).text();
 
-export const PollingDashboardTool = Tool.make("render_dashboard", {
+export const PollingDashboardResourceLayer = makeUiResource(
+  PollingUiResourceUri,
+  {
+    name: "Polling Dashboard",
+    description: "Polling dashboard example UI",
+    html: PollingDashboardHtml,
+  },
+);
+
+export const PollingDashboardTool = makeUiRenderTool(PollingUiResourceUri, {
+  name: "render_dashboard",
+  title: "Polling Dashboard",
   description: "Render the polling dashboard UI",
   parameters: Tool.EmptyParams,
   success: Schema.String,
-  failure: Schema.Never,
-})
-  .annotate(Tool.Title, "Polling Dashboard")
-  .annotate(Tool.Meta, {
-    ui: {
-      resourceUri: PollingUiResourceUri,
-    },
-  });
+});
 
 const DashboardStats = Schema.Struct({
   timestamp: Schema.String,
@@ -33,15 +37,11 @@ const DashboardStats = Schema.Struct({
   status: Schema.Literals(["idle", "ok", "busy"]),
 });
 
-export const PollDashboardStatsTool = Tool.make("get_dashboard_stats", {
+export const PollDashboardStatsTool = makeUiAppTool({
+  name: "get_dashboard_stats",
   description: "Returns latest dashboard stats for the polling UI",
   parameters: Tool.EmptyParams,
   success: DashboardStats,
-  failure: Schema.Never,
-}).annotate(Tool.Meta, {
-  ui: {
-    visibility: ["app"],
-  },
 });
 
 export const renderDashboardHandler = () =>

@@ -1,21 +1,24 @@
 import { Effect, Schema } from "effect";
-import { McpServer, Tool } from "effect/unstable/ai";
-import { UiResourceMimeType, uiContent } from "../shared";
+import { Tool } from "effect/unstable/ai";
+import { makeUiRenderTool, makeUiResource } from "../../service/McpAppService";
 
 const LineChartUiResourceUri = "ui://examples/line-chart";
 
-export const LineChartResourceLayer = McpServer.resource({
-  uri: LineChartUiResourceUri,
+const LineChartHtml = await Bun.file(
+  new URL("./index.html", import.meta.url),
+).text();
+
+export const LineChartResourceLayer = makeUiResource(LineChartUiResourceUri, {
   name: "Line Chart",
   description: "Line chart UI powered by sszvis",
-  mimeType: UiResourceMimeType,
-  content: uiContent(LineChartUiResourceUri, "line-chart/index.html", {
+  html: LineChartHtml,
+  meta: {
     prefersBorder: true,
     csp: {
       resourceDomains: ["https://cdn.jsdelivr.net"],
       connectDomains: ["https://cdn.jsdelivr.net"],
     },
-  }),
+  },
 });
 
 const LineChartPoint = Schema.Struct({
@@ -45,18 +48,13 @@ export const LineChartPayload = Schema.Struct({
   props: Schema.optional(LineChartProps),
 });
 
-export const RenderLineChartTool = Tool.make("render_line_chart", {
+export const RenderLineChartTool = makeUiRenderTool(LineChartUiResourceUri, {
+  name: "render_line_chart",
+  title: "Line Chart",
   description: "Render a line chart from data points",
   parameters: LineChartPayload,
   success: LineChartPayload,
-  failure: Schema.Never,
-})
-  .annotate(Tool.Title, "Line Chart")
-  .annotate(Tool.Meta, {
-    ui: {
-      resourceUri: LineChartUiResourceUri,
-    },
-  });
+});
 
 export const renderLineChartHandler = (payload: typeof LineChartPayload.Type) =>
   Effect.succeed(payload);

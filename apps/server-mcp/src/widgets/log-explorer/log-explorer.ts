@@ -1,6 +1,10 @@
 import { Effect, Layer, Ref, Schedule, Schema } from "effect";
-import { McpServer, Tool } from "effect/unstable/ai";
-import { UiResourceMimeType, uiContent } from "../shared";
+import { Tool } from "effect/unstable/ai";
+import {
+  makeUiAppTool,
+  makeUiRenderTool,
+  makeUiResource,
+} from "../../service/McpAppService";
 
 const LogExplorerUiResourceUri = "ui://examples/log-explorer";
 const MaxLogEntries = 200;
@@ -81,36 +85,32 @@ export const LogExplorerStateLayer = Layer.effectDiscard(
   }),
 );
 
-export const LogExplorerResourceLayer = McpServer.resource({
-  uri: LogExplorerUiResourceUri,
-  name: "Log Explorer",
-  description: "Live log explorer UI",
-  mimeType: UiResourceMimeType,
-  content: uiContent(LogExplorerUiResourceUri, "log-explorer/index.html"),
-});
+const LogExplorerHtml = await Bun.file(
+  new URL("./index.html", import.meta.url),
+).text();
 
-export const LogExplorerTool = Tool.make("render_log_explorer", {
+export const LogExplorerResourceLayer = makeUiResource(
+  LogExplorerUiResourceUri,
+  {
+    name: "Log Explorer",
+    description: "Live log explorer UI",
+    html: LogExplorerHtml,
+  },
+);
+
+export const LogExplorerTool = makeUiRenderTool(LogExplorerUiResourceUri, {
+  name: "render_log_explorer",
+  title: "Log Explorer",
   description: "Render the log explorer UI",
   parameters: Tool.EmptyParams,
   success: Schema.String,
-  failure: Schema.Never,
-})
-  .annotate(Tool.Title, "Log Explorer")
-  .annotate(Tool.Meta, {
-    ui: {
-      resourceUri: LogExplorerUiResourceUri,
-    },
-  });
+});
 
-export const PollLogEntriesTool = Tool.make("poll_log_entries", {
+export const PollLogEntriesTool = makeUiAppTool({
+  name: "poll_log_entries",
   description: "Return the latest log entries since the cursor",
   parameters: PollLogEntriesParams,
   success: PollLogEntriesResult,
-  failure: Schema.Never,
-}).annotate(Tool.Meta, {
-  ui: {
-    visibility: ["app"],
-  },
 });
 
 export const renderLogExplorerHandler = () =>

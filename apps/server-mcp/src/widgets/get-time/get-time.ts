@@ -1,7 +1,7 @@
 import { sep as pathSeparator } from "node:path";
 import { Effect, Schema } from "effect";
-import { McpServer, Tool } from "effect/unstable/ai";
-import { UiResourceMimeType, uiContent } from "../shared";
+import { Tool } from "effect/unstable/ai";
+import { makeUiRenderTool, makeUiResource } from "../../service/McpAppService";
 
 const GetTimeUiResourceUri = "ui://get-time";
 
@@ -14,32 +14,27 @@ const relativeGetTimePath = isDocker
   ? "./packages/lit-lab/dist/src/get_time/index.html"
   : "../../packages/lit-lab/dist/src/get_time/index.html";
 const GetTimeHtmlUrl = new URL(relativeGetTimePath, `file://${normalizedCwd}`);
+const GetTimeHtml = await Bun.file(GetTimeHtmlUrl).text();
 
-export const GetTimeResourceLayer = McpServer.resource({
-  uri: GetTimeUiResourceUri,
+export const GetTimeResourceLayer = makeUiResource(GetTimeUiResourceUri, {
   name: "Get Time",
   description: "Get time UI",
-  mimeType: UiResourceMimeType,
-  content: uiContent(GetTimeUiResourceUri, GetTimeHtmlUrl, {
+  html: GetTimeHtml,
+  meta: {
     prefersBorder: false,
     csp: {
       resourceDomains: ["https://cdn.jsdelivr.net"],
     },
-  }),
+  },
 });
 
-export const RenderGetTimeTool = Tool.make("render_get_time", {
+export const RenderGetTimeTool = makeUiRenderTool(GetTimeUiResourceUri, {
+  name: "render_get_time",
+  title: "Get Time",
   description: "Render the get time UI",
   parameters: Tool.EmptyParams,
   success: Schema.String,
-  failure: Schema.Never,
-})
-  .annotate(Tool.Title, "Get Time")
-  .annotate(Tool.Meta, {
-    ui: {
-      resourceUri: GetTimeUiResourceUri,
-    },
-  });
+});
 
 export const renderGetTimeHandler = () =>
   Effect.succeed("Get time ready. Use the UI to refresh.");
