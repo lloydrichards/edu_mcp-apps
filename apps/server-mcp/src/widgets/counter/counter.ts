@@ -1,7 +1,7 @@
 import { sep as pathSeparator } from "node:path";
 import { Effect, Schema } from "effect";
-import { McpServer, Tool } from "effect/unstable/ai";
-import { UiResourceMimeType, uiContent } from "../shared";
+import { Tool } from "effect/unstable/ai";
+import { makeUiRenderTool, makeUiResource } from "../../service/McpAppService";
 
 const CounterUiResourceUri = "ui://lit-lab/counter";
 
@@ -14,32 +14,27 @@ const relativeCounterPath = isDocker
   ? "./packages/lit-lab/dist/src/counter/index.html"
   : "../../packages/lit-lab/dist/src/counter/index.html";
 const CounterHtmlUrl = new URL(relativeCounterPath, `file://${normalizedCwd}`);
+const CounterHtml = await Bun.file(CounterHtmlUrl).text();
 
-export const CounterResourceLayer = McpServer.resource({
-  uri: CounterUiResourceUri,
+export const CounterResourceLayer = makeUiResource(CounterUiResourceUri, {
   name: "Counter",
   description: "Counter widget UI",
-  mimeType: UiResourceMimeType,
-  content: uiContent(CounterUiResourceUri, CounterHtmlUrl, {
+  html: CounterHtml,
+  meta: {
     prefersBorder: false,
     csp: {
       resourceDomains: ["https://cdn.jsdelivr.net"],
     },
-  }),
+  },
 });
 
-export const CounterTool = Tool.make("render_counter", {
+export const CounterTool = makeUiRenderTool(CounterUiResourceUri, {
+  name: "render_counter",
+  title: "Counter",
   description: "Render the counter widget UI",
   parameters: Tool.EmptyParams,
   success: Schema.String,
-  failure: Schema.Never,
-})
-  .annotate(Tool.Title, "Counter")
-  .annotate(Tool.Meta, {
-    ui: {
-      resourceUri: CounterUiResourceUri,
-    },
-  });
+});
 
 export const renderCounterHandler = () =>
   Effect.succeed("Counter ready. Use the UI to increment and decrement.");
