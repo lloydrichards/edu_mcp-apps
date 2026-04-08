@@ -1,10 +1,12 @@
-import CounterBundle from "@repo/lit-lab/counter.html" with { type: "text" };
+import CounterHtmlSource from "@repo/lit-lab/counter.html" with {
+  type: "text",
+};
 import { Effect, Schema } from "effect";
 import { Tool } from "effect/unstable/ai";
 import { makeUiRenderTool, makeUiResource } from "../../service/McpAppService";
 
 const CounterUiResourceUri = "ui://lit-lab/counter";
-const CounterHtml = CounterBundle.index;
+const CounterHtml = CounterHtmlSource as unknown as string;
 
 export const CounterResourceLayer = makeUiResource(CounterUiResourceUri, {
   name: "Counter",

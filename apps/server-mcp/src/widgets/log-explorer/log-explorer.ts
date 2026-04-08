@@ -5,11 +5,11 @@ import {
   makeUiRenderTool,
   makeUiResource,
 } from "../../service/McpAppService";
-import LogExplorerBundle from "./index.html" with { type: "text" };
+import LogExplorerHtmlSource from "./index.html" with { type: "text" };
 
 const LogExplorerUiResourceUri = "ui://examples/log-explorer";
 const MaxLogEntries = 200;
-const LogExplorerHtml = LogExplorerBundle.index;
+const LogExplorerHtml = LogExplorerHtmlSource as unknown as string;
 
 const LogLevel = Schema.Literals(["debug", "info", "warn", "error"]);
 

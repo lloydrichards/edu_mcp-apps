@@ -1,10 +1,12 @@
-import GetTimeBundle from "@repo/lit-lab/get_time.html" with { type: "text" };
+import GetTimeHtmlSource from "@repo/lit-lab/get_time.html" with {
+  type: "text",
+};
 import { Effect, Schema } from "effect";
 import { Tool } from "effect/unstable/ai";
 import { makeUiRenderTool, makeUiResource } from "../../service/McpAppService";
 
 const GetTimeUiResourceUri = "ui://get-time";
-const GetTimeHtml = GetTimeBundle.index;
+const GetTimeHtml = GetTimeHtmlSource as unknown as string;
 
 export const GetTimeResourceLayer = makeUiResource(GetTimeUiResourceUri, {
   name: "Get Time",
