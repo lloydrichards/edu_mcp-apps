@@ -1,20 +1,10 @@
-import { sep as pathSeparator } from "node:path";
+import CounterBundle from "@repo/lit-lab/counter.html" with { type: "text" };
 import { Effect, Schema } from "effect";
 import { Tool } from "effect/unstable/ai";
 import { makeUiRenderTool, makeUiResource } from "../../service/McpAppService";
 
 const CounterUiResourceUri = "ui://lit-lab/counter";
-
-const cwd = process.cwd();
-const normalizedCwd = cwd.endsWith(pathSeparator)
-  ? cwd
-  : `${cwd}${pathSeparator}`;
-const isDocker = process.env["MCP_DOCKER"] === "1";
-const relativeCounterPath = isDocker
-  ? "./packages/lit-lab/dist/src/counter/index.html"
-  : "../../packages/lit-lab/dist/src/counter/index.html";
-const CounterHtmlUrl = new URL(relativeCounterPath, `file://${normalizedCwd}`);
-const CounterHtml = await Bun.file(CounterHtmlUrl).text();
+const CounterHtml = CounterBundle.index;
 
 export const CounterResourceLayer = makeUiResource(CounterUiResourceUri, {
   name: "Counter",

@@ -25,17 +25,13 @@ FROM base AS runner
 WORKDIR /app
 
 ENV NODE_ENV production
-ENV MCP_DOCKER 1
 
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 server-mcp
 USER server-mcp
 
 COPY --from=builder /app/apps/server-mcp/dist/index.js ./server-mcp/index.js
-COPY --from=builder /app/apps/server-mcp/package.json ./server-mcp/package.json
-COPY --from=builder /app/apps/server-mcp/src/widgets ./server-mcp
-COPY --from=builder /app/packages/lit-lab/dist ./packages/lit-lab/dist
 
 EXPOSE 8000
 
-CMD ["bun", "run", "./server-mcp/index.js"]
+CMD ["bun", "./server-mcp/index.js"]
