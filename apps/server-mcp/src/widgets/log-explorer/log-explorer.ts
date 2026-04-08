@@ -5,9 +5,11 @@ import {
   makeUiRenderTool,
   makeUiResource,
 } from "../../service/McpAppService";
+import LogExplorerBundle from "./index.html" with { type: "text" };
 
 const LogExplorerUiResourceUri = "ui://examples/log-explorer";
 const MaxLogEntries = 200;
+const LogExplorerHtml = LogExplorerBundle.index;
 
 const LogLevel = Schema.Literals(["debug", "info", "warn", "error"]);
 
@@ -84,10 +86,6 @@ export const LogExplorerStateLayer = Layer.effectDiscard(
     yield* Effect.forkScoped(run);
   }),
 );
-
-const LogExplorerHtml = await Bun.file(
-  new URL("./index.html", import.meta.url),
-).text();
 
 export const LogExplorerResourceLayer = makeUiResource(
   LogExplorerUiResourceUri,

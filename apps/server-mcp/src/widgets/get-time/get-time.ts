@@ -1,20 +1,10 @@
-import { sep as pathSeparator } from "node:path";
+import GetTimeBundle from "@repo/lit-lab/get_time.html" with { type: "text" };
 import { Effect, Schema } from "effect";
 import { Tool } from "effect/unstable/ai";
 import { makeUiRenderTool, makeUiResource } from "../../service/McpAppService";
 
 const GetTimeUiResourceUri = "ui://get-time";
-
-const cwd = process.cwd();
-const normalizedCwd = cwd.endsWith(pathSeparator)
-  ? cwd
-  : `${cwd}${pathSeparator}`;
-const isDocker = process.env["MCP_DOCKER"] === "1";
-const relativeGetTimePath = isDocker
-  ? "./packages/lit-lab/dist/src/get_time/index.html"
-  : "../../packages/lit-lab/dist/src/get_time/index.html";
-const GetTimeHtmlUrl = new URL(relativeGetTimePath, `file://${normalizedCwd}`);
-const GetTimeHtml = await Bun.file(GetTimeHtmlUrl).text();
+const GetTimeHtml = GetTimeBundle.index;
 
 export const GetTimeResourceLayer = makeUiResource(GetTimeUiResourceUri, {
   name: "Get Time",

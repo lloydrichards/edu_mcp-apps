@@ -1,12 +1,9 @@
 import { Effect, Schema } from "effect";
-import { Tool } from "effect/unstable/ai";
 import { makeUiRenderTool, makeUiResource } from "../../service/McpAppService";
+import LineChartBundle from "./index.html" with { type: "text" };
 
 const LineChartUiResourceUri = "ui://examples/line-chart";
-
-const LineChartHtml = await Bun.file(
-  new URL("./index.html", import.meta.url),
-).text();
+const LineChartHtml = LineChartBundle.index;
 
 export const LineChartResourceLayer = makeUiResource(LineChartUiResourceUri, {
   name: "Line Chart",

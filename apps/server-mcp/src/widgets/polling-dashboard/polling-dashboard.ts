@@ -5,12 +5,10 @@ import {
   makeUiRenderTool,
   makeUiResource,
 } from "../../service/McpAppService";
+import PollingDashboardBundle from "./index.html" with { type: "text" };
 
 const PollingUiResourceUri = "ui://examples/polling-dashboard";
-
-const PollingDashboardHtml = await Bun.file(
-  new URL("./index.html", import.meta.url),
-).text();
+const PollingDashboardHtml = PollingDashboardBundle.index;
 
 export const PollingDashboardResourceLayer = makeUiResource(
   PollingUiResourceUri,

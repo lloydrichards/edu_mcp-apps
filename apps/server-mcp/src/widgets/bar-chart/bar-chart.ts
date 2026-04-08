@@ -1,12 +1,9 @@
 import { Effect, Schema } from "effect";
-import { Tool } from "effect/unstable/ai";
 import { makeUiRenderTool, makeUiResource } from "../../service/McpAppService";
+import BarChartBundle from "./index.html" with { type: "text" };
 
 const BarChartUiResourceUri = "ui://examples/bar-chart";
-
-const BarChartHtml = await Bun.file(
-  new URL("./index.html", import.meta.url),
-).text();
+const BarChartHtml = BarChartBundle.index;
 
 export const BarChartResourceLayer = makeUiResource(BarChartUiResourceUri, {
   name: "Bar Chart",

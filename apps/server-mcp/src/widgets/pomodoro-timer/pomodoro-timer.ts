@@ -1,12 +1,10 @@
 import { Effect, Schema } from "effect";
 import { Tool } from "effect/unstable/ai";
 import { makeUiRenderTool, makeUiResource } from "../../service/McpAppService";
+import PomodoroBundle from "./index.html" with { type: "text" };
 
 const PomodoroUiResourceUri = "ui://examples/pomodoro-timer";
-
-const PomodoroHtml = await Bun.file(
-  new URL("./index.html", import.meta.url),
-).text();
+const PomodoroHtml = PomodoroBundle.index;
 
 export const PomodoroTimerResourceLayer = makeUiResource(
   PomodoroUiResourceUri,
