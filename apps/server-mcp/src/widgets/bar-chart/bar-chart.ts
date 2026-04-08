@@ -1,9 +1,9 @@
 import { Effect, Schema } from "effect";
 import { makeUiRenderTool, makeUiResource } from "../../service/McpAppService";
-import BarChartBundle from "./index.html" with { type: "text" };
+import BarChartHtmlSource from "./index.html" with { type: "text" };
 
 const BarChartUiResourceUri = "ui://examples/bar-chart";
-const BarChartHtml = BarChartBundle.index;
+const BarChartHtml = BarChartHtmlSource as unknown as string;
 
 export const BarChartResourceLayer = makeUiResource(BarChartUiResourceUri, {
   name: "Bar Chart",
