@@ -1,97 +1,44 @@
-# MCP Apps Effect Server
+# MCP Apps server
 
-[Model Context Protocol](https://modelcontextprotocol.io/) server built with
-[Effect Platform](https://effect.website/docs/platform) and TypeScript, focused
-on the MCP Apps specification and generative UI for chat applications.
+The server uses `McpServer`, `McpProtocol`, `Tool`, and `Toolkit` from `effect/ai`.
+It serves Streamable HTTP at `/mcp`, with protocol adapters for `2026-07-28`,
+`2025-11-25`, `2025-06-18`, and `2025-03-26`. MCP Apps uses its separate UI protocol through the SDK in each
+widget.
 
-## Stack
+## Run the server
 
-- **@effect/ai** - Effect AI framework for MCP tools and resources
-- **Model Context Protocol** - AI assistant communication protocol
-- **Effect Platform** - Functional framework foundation
-- **Bun** - JavaScript runtime
-- **TypeScript** - Type safety
-- **@repo/domain** - Shared types and schemas
-
-## Getting Started
-
-From the monorepo root:
+From the repository root:
 
 ```bash
-# Start development server
-bun dev --filter=server-mcp
-
-# Build for production
-bun build --filter=server-mcp
-
-# Test MCP server functionality (MCP Apps inspector)
-bun run inspector
+bun install
+bun dev
 ```
 
-The MCP server provides tools and resources for AI assistants via the Model
-Context Protocol.
-
-## Architecture
-
-The MCP server uses @effect/ai for type-safe, functional MCP tool and resource
-handling:
-
-- **MCP Tools**: Exposed functions that AI assistants can call via AiToolkit
-- **MCP Resources**: Data sources that AI assistants can access with templates
-- **MCP Prompts**: Structured prompts with parameters and completion
-- **Type-safe Implementation**: Schema-driven validation and type safety
-- **Effect Integration**: Functional error handling and data processing
-- **Environment Agnostic**: Deploy to any JavaScript runtime
-
-## Testing
-
-You can test the MCP server functionality using the MCP Apps inspector:
+For a production build:
 
 ```bash
-bun run inspector
+bun run build
+bun start
 ```
 
-This starts the MCP server in watch mode and opens an interactive session where
-you can test MCP tools, resources, and UI responses.
+The default port is `9009`. Override it with `MCP_PORT`.
 
-## Example Implementation
+## Registration and lifecycle
 
-```typescript
-import { AiTool, AiToolkit } from "@effect/ai";
-import { Effect, Schema } from "effect";
+`src/index.ts` composes resources, tools, and the simulated log producer, then
+provides `McpServer.layerHttp` to those registration layers. The HTTP router
+serves the resulting layer through `BunHttpServer`.
 
-// Create toolkit with the tool
-const UserToolkit = AiToolkit.make(
-  AiTool.make("get_user", {
-    description: "Get user information by ID",
-    parameters: Schema.Struct({
-      userId: Schema.NumberFromString,
-      includeProfile: Schema.optional(Schema.Boolean),
-    }),
-    success: Schema.Struct({
-      id: Schema.Number,
-      name: Schema.String,
-      email: Schema.String,
-      profile: Schema.optional(Schema.Record(Schema.String, Schema.Unknown)),
-    }),
-  })
-);
+`src/service/McpAppService.ts` contains registration helpers. Render tools link
+to resources through `_meta.ui.resourceUri`. Polling tools declare
+`_meta.ui.visibility: ["app"]`. Resources return bundled HTML with the
+`text/html;profile=mcp-app` MIME type and UI security metadata.
 
-// Implement the toolkit logic
-const UserToolkitLive = UserToolkit.toLayer({
-  get_user: ({ userId, includeProfile }) =>
-    Effect.succeed({
-      id: userId,
-      name: `User ${userId}`,
-      email: `user${userId}@example.com`,
-      profile: includeProfile ? { theme: "dark", timezone: "UTC" } : undefined,
-    }),
-});
-```
+Widget sources live in `packages/lit-lab/src`. They register handlers before
+calling `App.connect()`. The SDK handles initialization, tool requests, and
+size notifications. Polling and timer widgets stop their intervals during
+teardown. Shared host-context handling applies themes, fonts, style variables,
+and safe-area padding.
 
-## Learn More
-
-- [Model Context Protocol Documentation](https://modelcontextprotocol.io/)
-- [@effect/ai Documentation](https://github.com/tim-smart/effect-io-ai)
-- [Effect Documentation](https://effect.website)
-- [bEvr Stack Overview](../../README.md)
+The browser smoke test runs the bundled server and exercises all seven UI
+resources. Run it from the root with `bun run test:e2e`.

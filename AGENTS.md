@@ -6,18 +6,18 @@
 
 ## Commands
 
-| Command                                            | Purpose                                   |
-| -------------------------------------------------- | ----------------------------------------- |
-| `bun install`                                      | Install dependencies                      |
-| `bun dev`                                          | Start all apps (client:3000, server:9000) |
-| `bun dev --filter=client`                          | Start client only                         |
-| `bun dev --filter=server`                          | Start server only                         |
-| `bun run build`                                    | Build all apps                            |
-| `bun type-check`                                   | Type check with Bun                       |
-| `bun lint`                                         | Lint with Biome                           |
-| `bun format`                                       | Format with Biome                         |
-| `bun run test`                                     | Run all tests (Vitest)                    |
-| `bun run test --filter=server -- src/file.test.ts` | Run single test file                      |
+| Command | Purpose |
+| --- | --- |
+| `bun install` | Install dependencies |
+| `bun dev` | Build widgets and start MCP server and UI watchers on port 9009 |
+| `bun start` | Run the bundled MCP server after building |
+| `bun --filter=server-mcp run dev` | Start server and UI watchers after building |
+| `bun run build` | Build all packages |
+| `bun type-check` | Type-check all packages |
+| `bun lint` | Lint with Biome |
+| `bun format` | Format with Biome |
+| `bun run test` | Run unit tests with Vitest |
+| `bun run test:e2e` | Build and test the production server and widgets |
 
 ## Task Completion Requirements
 
@@ -26,8 +26,8 @@ NEVER run `bun test`. Always use `bun run test` (runs Vitest).
 
 ## Tech Stack
 
-Bun 1.2+, TypeScript 5.9, Effect 3.19, React 19, Vite 7, Vitest 4, Tailwind CSS
-4, Biome 2.3
+Bun 1.4+, TypeScript 6, Effect 4.0.2, Lit 3, Vite 8, Vitest 5, Tailwind CSS
+4, Biome 2.4
 
 ## Dependency Patching (.patch)
 
@@ -40,7 +40,8 @@ Use Bun's patch workflow for any changes to dependencies and `.patch` files.
 | Workspace         | Stack              | AGENTS.md                   |
 | ----------------- | ------------------ | --------------------------- |
 | `apps/server-mcp` | Effect MCP Server  | `apps/server-mcp/AGENTS.md` |
-| `packages/domain` | Effect Schema, RPC | `packages/domain/AGENTS.md` |
+| `packages/lit-lab` | MCP Apps SDK, widget HTML | Root instructions |
+| `packages/ui-lit` | Shared Lit components | Root instructions |
 
 ## MCP Apps References
 
@@ -52,14 +53,14 @@ Use Bun's patch workflow for any changes to dependencies and `.patch` files.
 When answering questions about Effect, MCP Apps, or the MCP spec, search these
 cloned source repos first:
 
-- `.reference/effect/`
+- `.reference/effect-current/`
 - `.reference/ext-apps/`
 - `.reference/mcp-spec/`
 
 If any of the folders are missing (they are git ignored), clone them into
-`reference/`:
+`.reference/`:
 
-- `https://github.com/Effect-TS/effect-smol.git` -> `.reference/effect/`
+- `https://github.com/Effect-TS/effect.git` -> `.reference/effect-current/`
 - `https://github.com/modelcontextprotocol/ext-apps.git` -> `.reference/ext-apps/`
 - `https://github.com/modelcontextprotocol/modelcontextprotocol.git` -> `.reference/mcp-spec/`
 
