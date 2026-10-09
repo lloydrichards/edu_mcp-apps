@@ -86,8 +86,10 @@
     </div>
     <script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sszvis@3.4.0/build/sszvis.min.js"></script>
-    <script>
-      let nextId = 1;
+    <script type="module">
+      import { connectApp, createApp } from "../app";
+
+      const app = createApp("line-chart");
       const titleEl = document.getElementById("title");
       const subtitleEl = document.getElementById("subtitle");
       const statusEl = document.getElementById("status");
@@ -128,24 +130,6 @@
         .prop("ticks", {
           _: 5,
         });
-
-      function sendRequest(method, params) {
-        const id = nextId++;
-        window.parent.postMessage({ jsonrpc: "2.0", id, method, params }, "*");
-        return new Promise((resolve, reject) => {
-          function listener(event) {
-            if (!event.data || event.data.id !== id) return;
-            window.removeEventListener("message", listener);
-            if (event.data.result) return resolve(event.data.result);
-            reject(event.data.error || new Error("Request failed"));
-          }
-          window.addEventListener("message", listener);
-        });
-      }
-
-      function sendNotification(method, params) {
-        window.parent.postMessage({ jsonrpc: "2.0", method, params }, "*");
-      }
 
       function setStatus(text) {
         statusEl.textContent = text;
@@ -380,7 +364,7 @@
             ),
           );
           state.selection = closestData.filter(
-            sszvis.compose(sszvis.not(isNaN), yAcc),
+            sszvis.compose(sszvis.not(Number.isNaN), yAcc),
           );
           render();
         },
@@ -427,21 +411,18 @@
           );
       }
 
-      window.addEventListener("message", (event) => {
-        const data = event.data;
-        if (!data || !data.method) return;
-        if (data.method === "ui/notifications/tool-result") {
-          if (data.params?.isError) {
-            const message = data.params?.content?.[0]?.text || "Tool error";
+      app.ontoolresult = (result) => {
+          if (result?.isError) {
+            const message = result?.content?.[0]?.text || "Tool error";
             setStatus(message);
             return;
           }
-          const structured = data.params?.structuredContent;
+          const structured = result?.structuredContent;
           if (structured?.data) {
             renderChart(structured);
             return;
           }
-          const text = data.params?.content?.[0]?.text;
+          const text = result?.content?.[0]?.text;
           if (text) {
             try {
               renderChart(JSON.parse(text));
@@ -450,15 +431,11 @@
               setStatus("Failed to parse tool result");
             }
           }
-        }
-      });
+      };
 
-      sendRequest("ui/initialize", {
-        appCapabilities: {},
-        appInfo: { name: "line-chart", version: "0.1.0" },
-        protocolVersion: "2025-06-18",
-      }).then(() => {
-        sendNotification("ui/notifications/initialized", {});
+      app.ontoolinput = ({ arguments: args }) => renderChart(args);
+
+      connectApp(app).then(() => {
         setStatus("Ready for data");
       });
     </script>

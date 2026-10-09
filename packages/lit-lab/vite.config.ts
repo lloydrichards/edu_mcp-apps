@@ -2,7 +2,7 @@ import { resolve } from "node:path";
 import { defineConfig } from "vite";
 import { viteSingleFile } from "vite-plugin-singlefile";
 
-export default defineConfig(({ command }) => ({
+export default defineConfig(({ command, mode }) => ({
   plugins: [viteSingleFile({ useRecommendedBuildConfig: false })],
   resolve:
     command === "serve"
@@ -20,15 +20,12 @@ export default defineConfig(({ command }) => ({
     chunkSizeWarningLimit: 100000000,
     cssCodeSplit: false,
     outDir: "dist",
-    emptyOutDir: true,
+    emptyOutDir: false,
     assetsDir: "",
     rollupOptions: {
-      input: {
-        get_time: resolve(__dirname, "src/get_time/index.html"),
-        counter: resolve(__dirname, "src/counter/index.html"),
-      },
+      input: resolve(__dirname, `src/${mode}/index.html`),
       output: {
-        inlineDynamicImports: false,
+        codeSplitting: false,
         entryFileNames: "[name].js",
         chunkFileNames: "[name].js",
         assetFileNames: "[name][extname]",

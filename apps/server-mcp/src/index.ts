@@ -1,7 +1,7 @@
 import { BunHttpServer, BunRuntime, BunServices } from "@effect/platform-bun";
 import { Config, Effect, Layer } from "effect";
-import { McpServer, Toolkit } from "effect/unstable/ai";
-import { HttpRouter, HttpServer } from "effect/unstable/http";
+import { McpProtocol, McpServer, Toolkit } from "effect/ai";
+import { HttpRouter, HttpServer } from "effect/http";
 import {
   BarChartResourceLayer,
   RenderBarChartTool,
@@ -95,23 +95,41 @@ const McpLive = Layer.mergeAll(
 );
 
 const ServerConfig = Config.all({
-  port: Config.number("MCP_PORT").pipe(Config.withDefault(9009)),
+  port: Config.Number("MCP_PORT").pipe(Config.withDefault(9009)),
 });
 
-const McpRouter = McpServer.layerHttp({
-  name: "Edu MCP App Server",
-  version: "0.2.0",
-  path: "/mcp",
-  extensions: {
-    "io.modelcontextprotocol/ui": {},
-  },
-}).pipe(
-  Layer.provideMerge(McpLive),
+const McpRouter = McpLive.pipe(
+  Layer.provide(
+    McpServer.layerHttp({
+      name: "Edu MCP App Server",
+      version: "0.2.0",
+      path: "/mcp",
+      protocols: [
+        McpProtocol.v2026_07_28,
+        McpProtocol.v2025_11_25,
+        McpProtocol.v2025_06_18,
+        McpProtocol.v2025_03_26,
+      ],
+      allowSessionTermination: true,
+      extensions: {
+        "io.modelcontextprotocol/ui": {},
+      },
+    }),
+  ),
   Layer.provide(
     HttpRouter.cors({
       allowedOrigins: ["*"],
       allowedMethods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
-      allowedHeaders: ["Content-Type", "Authorization", "mcp-protocol-version"],
+      allowedHeaders: [
+        "Content-Type",
+        "Authorization",
+        "mcp-protocol-version",
+        "mcp-method",
+        "mcp-name",
+        "mcp-session-id",
+        "last-event-id",
+      ],
+      exposedHeaders: ["mcp-session-id", "mcp-protocol-version"],
       credentials: false,
     }),
   ),

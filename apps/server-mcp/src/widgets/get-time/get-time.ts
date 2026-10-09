@@ -2,7 +2,7 @@ import GetTimeHtmlSource from "@repo/lit-lab/get_time.html" with {
   type: "text",
 };
 import { Effect, Schema } from "effect";
-import { Tool } from "effect/unstable/ai";
+import { Tool } from "effect/ai";
 import { makeUiRenderTool, makeUiResource } from "../../service/McpAppService";
 
 const GetTimeUiResourceUri = "ui://get-time";

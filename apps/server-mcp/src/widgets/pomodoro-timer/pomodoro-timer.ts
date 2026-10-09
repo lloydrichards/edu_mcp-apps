@@ -1,7 +1,9 @@
+import PomodoroHtmlSource from "@repo/lit-lab/pomodoro-timer.html" with {
+  type: "text",
+};
 import { Effect, Schema } from "effect";
-import { Tool } from "effect/unstable/ai";
+import { Tool } from "effect/ai";
 import { makeUiRenderTool, makeUiResource } from "../../service/McpAppService";
-import PomodoroHtmlSource from "./index.html" with { type: "text" };
 
 const PomodoroUiResourceUri = "ui://examples/pomodoro-timer";
 const PomodoroHtml = PomodoroHtmlSource as unknown as string;

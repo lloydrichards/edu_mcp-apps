@@ -175,6 +175,9 @@
     </div>
 
     <script type="module">
+      import { connectApp, createApp } from "../app";
+
+      const app = createApp("pomodoro-timer");
       const startBtn = document.getElementById("startBtn");
       const pauseBtn = document.getElementById("pauseBtn");
       const resetBtn = document.getElementById("resetBtn");
@@ -328,6 +331,8 @@
       focusInput.addEventListener("sl-change", handleInputChange);
       breakInput.addEventListener("sl-change", handleInputChange);
 
+      app.onteardown = async () => { stopTimer(); return {}; };
+      void connectApp(app);
       updateModeUI();
       updateDisplay();
       setButtons(false);

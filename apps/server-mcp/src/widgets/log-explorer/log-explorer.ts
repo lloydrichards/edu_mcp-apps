@@ -1,11 +1,13 @@
+import LogExplorerHtmlSource from "@repo/lit-lab/log-explorer.html" with {
+  type: "text",
+};
 import { Effect, Layer, Ref, Schedule, Schema } from "effect";
-import { Tool } from "effect/unstable/ai";
+import { Tool } from "effect/ai";
 import {
   makeUiAppTool,
   makeUiRenderTool,
   makeUiResource,
 } from "../../service/McpAppService";
-import LogExplorerHtmlSource from "./index.html" with { type: "text" };
 
 const LogExplorerUiResourceUri = "ui://examples/log-explorer";
 const MaxLogEntries = 200;

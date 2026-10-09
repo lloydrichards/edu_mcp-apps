@@ -168,8 +168,10 @@
         <div class="stream" id="stream"></div>
       </div>
     </div>
-    <script>
-      let nextId = 1;
+    <script type="module">
+      import { connectApp, createApp } from "../app";
+
+      const app = createApp("log-explorer");
       let cursor = 0;
       let intervalId = null;
       let paused = false;
@@ -179,24 +181,6 @@
       const lastEl = document.getElementById("last");
       const pauseBtn = document.getElementById("pause");
       const clearBtn = document.getElementById("clear");
-
-      function sendRequest(method, params) {
-        const id = nextId++;
-        window.parent.postMessage({ jsonrpc: "2.0", id, method, params }, "*");
-        return new Promise((resolve, reject) => {
-          function listener(event) {
-            if (!event.data || event.data.id !== id) return;
-            window.removeEventListener("message", listener);
-            if (event.data.result) return resolve(event.data.result);
-            reject(event.data.error || new Error("Request failed"));
-          }
-          window.addEventListener("message", listener);
-        });
-      }
-
-      function sendNotification(method, params) {
-        window.parent.postMessage({ jsonrpc: "2.0", method, params }, "*");
-      }
 
       function setStatus(value) {
         statusEl.textContent = value;
@@ -225,7 +209,7 @@
 
       async function poll() {
         try {
-          const result = await sendRequest("tools/call", {
+          const result = await app.callServerTool( {
             name: "poll_log_entries",
             arguments: { cursor },
           });
@@ -283,12 +267,9 @@
         streamEl.innerHTML = "<div class=\"empty\">Log cleared.</div>";
       });
 
-      sendRequest("ui/initialize", {
-        appCapabilities: {},
-        appInfo: { name: "log-explorer", version: "0.1.0" },
-        protocolVersion: "2025-06-18",
-      }).then(() => {
-        sendNotification("ui/notifications/initialized", {});
+      app.onteardown = async () => { stopPolling(); return {}; };
+
+      connectApp(app).then(() => {
         streamEl.innerHTML = "<div class=\"empty\">Listening…</div>";
         setStatus("live");
         startPolling();

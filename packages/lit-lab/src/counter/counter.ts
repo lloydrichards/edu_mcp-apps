@@ -1,3 +1,5 @@
+import { connectApp, createApp } from "../app";
+
 const countElement = document.querySelector("#count");
 const decrementButton = document.querySelector("#decrement");
 const incrementButton = document.querySelector("#increment");
@@ -21,3 +23,6 @@ decrementButton.addEventListener("click", () => updateCount(-1));
 incrementButton.addEventListener("click", () => updateCount(1));
 
 render();
+
+const app = createApp("counter");
+void connectApp(app);

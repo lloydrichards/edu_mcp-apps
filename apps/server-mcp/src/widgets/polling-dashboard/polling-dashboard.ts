@@ -1,11 +1,13 @@
+import PollingDashboardHtmlSource from "@repo/lit-lab/polling-dashboard.html" with {
+  type: "text",
+};
 import { Effect, Schema } from "effect";
-import { Tool } from "effect/unstable/ai";
+import { Tool } from "effect/ai";
 import {
   makeUiAppTool,
   makeUiRenderTool,
   makeUiResource,
 } from "../../service/McpAppService";
-import PollingDashboardHtmlSource from "./index.html" with { type: "text" };
 
 const PollingUiResourceUri = "ui://examples/polling-dashboard";
 const PollingDashboardHtml = PollingDashboardHtmlSource as unknown as string;

@@ -1,6 +1,8 @@
+import BarChartHtmlSource from "@repo/lit-lab/bar-chart.html" with {
+  type: "text",
+};
 import { Effect, Schema } from "effect";
 import { makeUiRenderTool, makeUiResource } from "../../service/McpAppService";
-import BarChartHtmlSource from "./index.html" with { type: "text" };
 
 const BarChartUiResourceUri = "ui://examples/bar-chart";
 const BarChartHtml = BarChartHtmlSource as unknown as string;

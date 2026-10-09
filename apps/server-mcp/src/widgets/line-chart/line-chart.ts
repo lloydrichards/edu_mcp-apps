@@ -1,6 +1,8 @@
+import LineChartHtmlSource from "@repo/lit-lab/line-chart.html" with {
+  type: "text",
+};
 import { Effect, Schema } from "effect";
 import { makeUiRenderTool, makeUiResource } from "../../service/McpAppService";
-import LineChartHtmlSource from "./index.html" with { type: "text" };
 
 const LineChartUiResourceUri = "ui://examples/line-chart";
 const LineChartHtml = LineChartHtmlSource as unknown as string;

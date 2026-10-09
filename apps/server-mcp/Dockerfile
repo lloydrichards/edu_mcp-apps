@@ -24,7 +24,8 @@ RUN bun run build --filter=server-mcp...
 FROM base AS runner
 WORKDIR /app
 
-ENV NODE_ENV production
+ENV NODE_ENV=production
+ENV MCP_PORT=9009
 
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 server-mcp
@@ -32,6 +33,6 @@ USER server-mcp
 
 COPY --from=builder /app/apps/server-mcp/dist/index.js ./server-mcp/index.js
 
-EXPOSE 8000
+EXPOSE 9009
 
 CMD ["bun", "./server-mcp/index.js"]

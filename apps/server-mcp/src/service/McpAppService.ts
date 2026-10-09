@@ -1,5 +1,5 @@
-import { Effect, Layer, Schema, ServiceMap } from "effect";
-import { McpServer, Tool } from "effect/unstable/ai";
+import { Effect, Schema } from "effect";
+import { McpServer, Tool } from "effect/ai";
 
 const UiResourceMimeType = "text/html;profile=mcp-app";
 
@@ -78,16 +78,3 @@ export const makeUiAppTool = <
     success: spec.success,
     failure: Schema.Never,
   }).annotate(Tool.Meta, { ui: { visibility: ["app"] } });
-
-export class McpAppService extends ServiceMap.Service<McpAppService>()(
-  "McpAppService",
-  {
-    make: Effect.sync(() => ({
-      makeResource: makeUiResource,
-      makeRenderTool: makeUiRenderTool,
-      makeAppTool: makeUiAppTool,
-    })),
-  },
-) {
-  Default = Layer.effect(McpAppService, McpAppService.make);
-}
